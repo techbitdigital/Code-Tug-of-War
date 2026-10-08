@@ -1,0 +1,21 @@
+{
+  "id": "functions-1",
+  "stationId": "functions",
+  "title": "Calling a Function",
+  "code": "function double(n) {\n  return n * 2;\n}\n\nlet result = double(5);",
+  "snapshots": [
+    { "highlightLine": 5, "stack": [], "note": "double(5) is about to be called." },
+    { "highlightLine": 1, "stack": [{ "name": "n", "value": "5" }], "note": "A new stack frame for double() is pushed. n is set to 5 inside it." },
+    { "highlightLine": 2, "stack": [{ "name": "n", "value": "5" }], "note": "return n * 2 runs inside the function's frame." }
+  ],
+  "question": {
+    "prompt": "The function's frame is about to pop off the stack. What value does it return?",
+    "options": ["5", "10", "undefined", "\"n * 2\""],
+    "correctIndex": 1,
+    "revealSnapshot": {
+      "highlightLine": 5,
+      "stack": [{ "name": "result", "value": "10" }],
+      "note": "double()'s frame pops off. result is set to 10 back in the outer scope."
+    }
+  }
+}
