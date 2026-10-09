@@ -1,8 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Pause, Play, RotateCcw, Timer, Trophy, Zap } from "lucide-react";
+import { ArrowDown, Pause, Play, RotateCcw, Timer, Trophy, Zap } from "lucide-react";
 import type { MatchState, RoundResult, Side } from "@/lib/engine";
 import { motionTokens } from "@/lib/motion";
 import TeamMarker from "./TeamMarker";
@@ -46,22 +47,29 @@ function ActionButton({
 /** Dimmed backdrop + centred card over the whole stage. */
 function Modal({ children, label }: { children: ReactNode; label: string }) {
   const reduced = useReducedMotion() ?? false;
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={label}
-      className="fixed inset-0 z-40 flex items-center justify-center bg-ink/35 p-[var(--pad)] backdrop-blur-[3px] @3xl:absolute"
-    >
-      <motion.div
-        initial={reduced ? false : { scale: 0.9, opacity: 0, y: 12 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={motionTokens.settle}
-        className="flex w-full max-w-[min(92%,40rem)] flex-col items-center gap-[calc(var(--gap)*1.4)] rounded-[var(--r-card)] bg-surface p-[calc(var(--pad)*1.6)] text-center shadow-panel"
+  // Portalled to <body> so it always covers the screen, even on a long phone page.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return createPortal(
+    <div className="match-portal">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        className="match-stage absolute inset-0 flex items-center justify-center bg-ink/35 p-[var(--pad)] backdrop-blur-[3px]"
       >
-        {children}
-      </motion.div>
-    </div>
+        <motion.div
+          initial={reduced ? false : { scale: 0.9, opacity: 0, y: 12 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={motionTokens.settle}
+          className="flex w-full max-w-[min(100%,36rem)] flex-col items-center gap-[calc(var(--gap)*1.4)] rounded-[var(--r-card)] bg-surface p-[calc(var(--pad)*1.6)] text-center shadow-panel @3xl:max-w-[50cqw]"
+        >
+          {children}
+        </motion.div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -125,28 +133,23 @@ export function PausedCard({ onResume }: { onResume: () => void }) {
 }
 
 /**
- * Covers the question card once a round ends: who pulled, the right answer and the
- * first line of the explanation. Step 5 replaces the body with the full
- * beneath-the-line reveal.
+ * Covers the question card for a moment after a round ends, while the rope moves:
+ * who pulled and the right answer. Then the reveal opens (automatically, or on the button).
  */
 export function RoundBanner({
   result,
   names,
   answerText,
-  explanation,
-  matchOver,
-  onNext,
+  onOpenReveal,
 }: {
   result: RoundResult;
   names: Record<Side, string>;
   answerText: string;
-  explanation?: string;
-  matchOver: boolean;
-  onNext: () => void;
+  onOpenReveal: () => void;
 }) {
   const reduced = useReducedMotion() ?? false;
   const w = result.winner;
-  const headline = w ? `${names[w]} pulls!` : result.reason === "timeout" ? "Time's up!" : "Skipped";
+  const headline = headlineFor(result, names);
 
   return (
     <motion.div
@@ -156,39 +159,59 @@ export function RoundBanner({
       transition={motionTokens.settle}
       className="absolute inset-0 z-20 flex flex-col overflow-hidden rounded-[var(--r-card)] bg-surface shadow-panel"
     >
-      <div
-        className={`flex items-center justify-center gap-[var(--gap)] px-[var(--pad)] py-[calc(var(--gap)*1.2)] text-white ${
-          w ? TEAM_BG[w] : "bg-gradient-to-br from-[#6B7090] to-ink"
-        }`}
-      >
-        {w ? (
-          <Zap className="size-[1.1em] fill-focus text-focus" aria-hidden="true" />
-        ) : (
-          <Timer className="size-[1.1em]" aria-hidden="true" />
-        )}
-        <span className="font-display text-[length:var(--fs-prompt)] font-black">{headline}</span>
-        {w && result.timeMs !== null && (
-          <span className="rounded-full bg-white/20 px-3 py-0.5 text-[length:var(--fs-ui)] font-extrabold">
-            {(result.timeMs / 1000).toFixed(1)}s
-          </span>
-        )}
-      </div>
+      <ResultStrip result={result} headline={headline} />
       <div className="flex flex-1 flex-col items-center justify-center gap-[var(--gap)] p-[var(--pad)] text-center">
         <p className="text-[length:var(--fs-ui)] font-bold uppercase tracking-[0.08em] text-ink-muted">The answer</p>
         <p className="rounded-[var(--r-key)] bg-[#DCFCE7] px-[var(--pad)] py-[calc(var(--gap)*0.5)] font-mono text-[length:var(--fs-prompt)] font-bold text-correct">
           {answerText}
         </p>
-        {explanation && (
-          <p className="max-w-[90%] text-[length:var(--fs-option)] font-bold leading-snug text-ink">{explanation}</p>
-        )}
       </div>
       <div className="flex justify-center p-[var(--pad)] pt-0">
-        <ActionButton onClick={onNext} autoFocus tone={w ?? "accent"}>
-          {matchOver ? "See results" : "Next question"} <ArrowRight className="size-[1em]" strokeWidth={3} aria-hidden="true" />
+        <ActionButton onClick={onOpenReveal} tone={w ?? "accent"}>
+          See beneath the line <ArrowDown className="size-[1em]" strokeWidth={3} aria-hidden="true" />
         </ActionButton>
       </div>
     </motion.div>
   );
+}
+
+/** Coloured strip naming the round's outcome; also the reveal's header. */
+export function ResultStrip({
+  result,
+  headline,
+  children,
+}: {
+  result: RoundResult;
+  headline: string;
+  children?: ReactNode;
+}) {
+  const w = result.winner;
+  return (
+    <div
+      className={`flex flex-wrap items-center justify-center gap-[var(--gap)] px-[var(--pad)] py-[calc(var(--gap)*1.1)] text-white ${
+        w ? TEAM_BG[w] : "bg-gradient-to-br from-[#6B7090] to-ink"
+      }`}
+    >
+      {w ? (
+        <Zap className="size-[1.1em] fill-focus text-focus" aria-hidden="true" />
+      ) : (
+        <Timer className="size-[1.1em]" aria-hidden="true" />
+      )}
+      <span className="font-display text-[length:var(--fs-option)] font-black @3xl:text-[length:var(--fs-prompt)]">
+        {headline}
+      </span>
+      {w && result.timeMs !== null && (
+        <span className="rounded-full bg-white/20 px-3 py-0.5 text-[length:var(--fs-ui)] font-extrabold">
+          {(result.timeMs / 1000).toFixed(1)}s
+        </span>
+      )}
+      {children}
+    </div>
+  );
+}
+
+export function headlineFor(result: RoundResult, names: Record<Side, string>) {
+  return result.winner ? `${names[result.winner]} pulls!` : result.reason === "timeout" ? "Time's up!" : "Skipped";
 }
 
 export function ResultCard({ state, onRestart }: { state: MatchState; onRestart: () => void }) {

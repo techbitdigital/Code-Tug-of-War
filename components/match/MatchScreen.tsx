@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useReducedMotion } from "framer-motion";
 import { correctAnswerText, ropeDecided, type MatchConfig } from "@/lib/engine";
 import { useMatch } from "@/lib/useMatch";
 import MatchStage from "./MatchStage";
-import { PausedCard, ReadyCard, ResultCard, RoundBanner } from "./Overlays";
+import Reveal from "@/components/reveal/Reveal";
+import { headlineFor, PausedCard, ReadyCard, ResultCard, ResultStrip, RoundBanner } from "./Overlays";
 import QuestionCard from "./QuestionCard";
 import RopeTrack from "./RopeTrack";
 import TeamMarker from "./TeamMarker";
@@ -32,6 +34,19 @@ export default function MatchScreen({ config, children }: MatchScreenProps) {
   const revealing = phase === "reveal" || phase === "over";
   const correctIndex = revealing && round.answer.type === "mcq" ? round.answer.correctIndex : undefined;
   const paused = state.pausedAt !== null;
+
+  // After a round ends, let the rope finish moving before the reveal covers the stage.
+  const reduced = useReducedMotion() ?? false;
+  const [revealOpen, setRevealOpen] = useState(false);
+  useEffect(() => {
+    if (phase !== "reveal") {
+      setRevealOpen(false);
+      return;
+    }
+    const t = setTimeout(() => setRevealOpen(true), reduced ? 900 : 2200);
+    return () => clearTimeout(t);
+  }, [phase, state.roundIndex, reduced]);
+  const matchOver = ropeDecided(state) || state.roundIndex >= config.rounds.length - 1;
 
   const overlay =
     phase === "ready" ? (
@@ -62,14 +77,12 @@ export default function MatchScreen({ config, children }: MatchScreenProps) {
         }
         question={<QuestionCard round={round} />}
         questionOverlay={
-          phase === "reveal" && lastResult ? (
+          phase === "reveal" && lastResult && !revealOpen ? (
             <RoundBanner
               result={lastResult}
               names={names}
               answerText={correctAnswerText(round.answer)}
-              explanation={round.reveal[round.reveal.length - 1]?.say}
-              matchOver={ropeDecided(state) || state.roundIndex >= config.rounds.length - 1}
-              onNext={actions.next}
+              onOpenReveal={() => setRevealOpen(true)}
             />
           ) : null
         }
@@ -112,6 +125,25 @@ export default function MatchScreen({ config, children }: MatchScreenProps) {
             correctIndex={correctIndex}
             robot={solo}
           />
+        }
+        sheet={
+          phase === "reveal" && lastResult && revealOpen ? (
+            <Reveal
+              key={round.id}
+              frames={round.reveal}
+              code={round.code}
+              header={
+                <ResultStrip result={lastResult} headline={headlineFor(lastResult, names)}>
+                  <span className="rounded-full bg-white px-3 py-0.5 font-mono text-[length:var(--fs-ui)] font-bold text-correct">
+                    Answer: {correctAnswerText(round.answer)}
+                  </span>
+                </ResultStrip>
+              }
+              finishLabel={matchOver ? "See results" : "Next question"}
+              tone={lastResult.winner ?? "accent"}
+              onFinish={actions.next}
+            />
+          ) : null
         }
         overlay={overlay}
       />

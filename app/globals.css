@@ -119,6 +119,16 @@
   }
 }
 
+/* Full-screen layer for dialogs, portalled to <body>. It is its own size container, so
+   dialogs get the same size tokens without being trapped inside the stage (a container
+   with layout containment would otherwise capture position: fixed). */
+.match-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  container-type: inline-size;
+}
+
 /* Size tokens, phone values first. Stage values are px at the 1280x720 reference. */
 .match-stage {
   --fs-prompt: 22px;
