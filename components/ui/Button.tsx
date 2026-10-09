@@ -4,8 +4,8 @@ type Variant = "primary" | "secondary";
 type Size = "md" | "lg";
 
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-ink text-surface border-ink",
-  secondary: "bg-surface text-ink border-ink",
+  primary: "bg-gradient-to-b from-[#8B5CF6] to-accent text-white shadow-[0_5px_0_#5B21B6]",
+  secondary: "bg-surface text-ink border-2 border-line shadow-key",
 };
 
 // 44px elsewhere, 56px on the match screen (per the brief).
@@ -28,7 +28,7 @@ export default function Button({
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center rounded-md border-[3px] font-semibold transition-transform active:scale-[0.96] focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-50 ${VARIANT[variant]} ${SIZE[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-2xl font-extrabold transition-[transform,box-shadow] active:translate-y-[4px] active:shadow-none focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-50 ${VARIANT[variant]} ${SIZE[size]} ${className}`}
       {...props}
     />
   );

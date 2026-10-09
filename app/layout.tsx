@@ -1,15 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Nunito } from "next/font/google";
 
-const display = Space_Grotesk({
+// Nunito's rounded letterforms give the friendly, game-show feel for all UI text.
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
-const sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-nunito",
   display: "swap",
 });
 const mono = JetBrains_Mono({
@@ -25,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${nunito.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

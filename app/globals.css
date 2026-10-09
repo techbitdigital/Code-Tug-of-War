@@ -2,19 +2,25 @@
 
 /* Colour tokens from the brief, verbatim. */
 :root {
-  --arena-bg: #F6F4EF;
+  --arena-bg: #F3F4FA;
   --surface: #FFFFFF;
-  --ink: #14161F;
-  --ink-muted: #5B6070;
-  --line: #E3E0D8;
-  --team-a: #2F6BFF;
-  --team-a-soft: #E6EEFF;
-  --team-b: #FF6A3D;
-  --team-b-soft: #FFEDE6;
+  --ink: #1B1F3B;
+  --ink-muted: #6B7090;
+  --line: #E4E6F0;
+  --key-edge: #D9DCEA;
+  --team-a: #2563EB;
+  --team-a-bright: #3B82F6;
+  --team-a-deep: #1D4ED8;
+  --team-a-soft: #EAF1FF;
+  --team-b: #E11D48;
+  --team-b-bright: #F43F5E;
+  --team-b-deep: #BE123C;
+  --team-b-soft: #FFE9EE;
+  --accent: #7C3AED;
   --correct: #16A34A;
-  --wrong: #E5484D;
-  --focus: #FFC93C;
-  --code-bg: #0F1220;
+  --wrong: #DC2626;
+  --focus: #FACC15;
+  --code-bg: #141833;
   --code-ink: #E6E9F2;
   --code-key: #7AA2FF;
   --code-str: #8FE3A4;
@@ -30,10 +36,16 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
+  --color-key-edge: var(--key-edge);
   --color-team-a: var(--team-a);
+  --color-team-a-bright: var(--team-a-bright);
+  --color-team-a-deep: var(--team-a-deep);
   --color-team-a-soft: var(--team-a-soft);
   --color-team-b: var(--team-b);
+  --color-team-b-bright: var(--team-b-bright);
+  --color-team-b-deep: var(--team-b-deep);
   --color-team-b-soft: var(--team-b-soft);
+  --color-accent: var(--accent);
   --color-correct: var(--correct);
   --color-wrong: var(--wrong);
   --color-focus: var(--focus);
@@ -44,8 +56,8 @@
   --color-code-num: var(--code-num);
   --color-code-fn: var(--code-fn);
 
-  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-nunito), system-ui, sans-serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
@@ -54,7 +66,10 @@
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --shadow-panel: 0 8px 0 rgba(20, 22, 31, 0.12);
+  --radius-xl: 28px;
+  /* Soft, friendly depth: a wide blur plus a tight contact shadow. */
+  --shadow-panel: 0 12px 32px rgba(27, 31, 59, 0.1), 0 2px 6px rgba(27, 31, 59, 0.06);
+  --shadow-key: 0 4px 0 var(--key-edge);
 
   /* Brief sizes at 1280x720, scaled with vw so a 1920 smartboard gets ~1.5x. */
   --text-display: clamp(56px, 7.5vw, 240px);
@@ -69,7 +84,102 @@
   body {
     background: var(--arena-bg);
     color: var(--ink);
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Match stage (Step 2)
+
+   .match-container is the 16:9 stage on laptops and projectors (>= 768px wide
+   and >= 480px tall). Below that it is a plain full-width column for phones.
+   Everything inside sizes itself from the container's own width (cqw units),
+   so the layout is identical at 1280x720, 1920x1080 and anything in between.
+   --------------------------------------------------------------------------- */
+.match-shell {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--arena-bg);
+  background-image: radial-gradient(rgba(27, 31, 59, 0.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.match-container {
+  position: relative;
+  container-type: inline-size;
+  width: 100%;
+}
+
+@media (min-width: 768px) and (min-height: 480px) {
+  .match-container {
+    width: min(100vw, calc(100dvh * 16 / 9));
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Size tokens, phone values first. Stage values are px at the 1280x720 reference. */
+.match-stage {
+  --fs-prompt: 22px;
+  --fs-code: 14px;
+  --fs-option: 17px;
+  --fs-name: 18px;
+  --fs-ui: 14px;
+  --fs-key: 11px;
+  --pad: 14px;
+  --gap: 10px;
+  --btn-h: 56px;
+  --pull-h: 56px;
+  --chip: 32px;
+  --head-h: 56px;
+  --bar-h: 44px;
+  --bar-btn: 40px;
+  --timer-w: 110px;
+  --timer-h: 12px;
+  --r-card: 22px;
+  --r-key: 14px;
+  --arena-h: 160px;
+}
+
+@container (min-width: 768px) {
+  .match-stage {
+    --fs-prompt: 2.5cqw; /* 32px */
+    --fs-code: 2.1875cqw; /* 28px */
+    --fs-option: 1.875cqw; /* 24px */
+    --fs-name: 1.875cqw; /* 24px */
+    --fs-ui: 1.25cqw; /* 16px */
+    --fs-key: 0.9375cqw; /* 12px */
+    --pad: 1.5625cqw; /* 20px */
+    --gap: 0.9375cqw; /* 12px */
+    --btn-h: auto;
+    --pull-h: 5cqw; /* 64px */
+    --chip: 3.125cqw; /* 40px */
+    --head-h: 5.625cqw; /* 72px */
+    --bar-h: 3.75cqw; /* 48px */
+    --bar-btn: 3.4375cqw; /* 44px */
+    --timer-w: 25cqw; /* 320px */
+    --timer-h: 1.09375cqw; /* 14px */
+    --r-card: 2.1875cqw; /* 28px */
+    --r-key: 1.25cqw; /* 16px */
+  }
+}
+
+/* Text that shrinks to fit its fixed-size card (brief: "text scaled to fit").
+   --fit / --fit-w / --fit-h come from lib/fit.ts. They apply on the stage only;
+   on phones the card grows, long code lines scroll sideways and the size stays readable. */
+.prompt-text {
+  font-size: var(--fs-prompt);
+}
+.code-text {
+  font-size: var(--fs-code);
+}
+@container (min-width: 768px) {
+  .prompt-text {
+    font-size: calc(var(--fs-prompt) * var(--fit, 1));
+  }
+  .code-text {
+    font-size: calc(var(--fs-code) * min(var(--fit-w, 1), var(--fit-h, 1)));
   }
 }
 

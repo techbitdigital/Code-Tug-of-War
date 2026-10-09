@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Button from "@/components/ui/Button";
 import TeamPanel from "@/components/match/TeamPanel";
@@ -10,9 +11,12 @@ const SWATCHES = [
   ["--ink-muted", "Ink muted"],
   ["--line", "Line"],
   ["--team-a", "Team A"],
+  ["--team-a-bright", "Team A bright"],
   ["--team-a-soft", "Team A soft"],
   ["--team-b", "Team B"],
+  ["--team-b-bright", "Team B bright"],
   ["--team-b-soft", "Team B soft"],
+  ["--accent", "Accent"],
   ["--correct", "Correct"],
   ["--wrong", "Wrong"],
   ["--focus", "Focus"],
@@ -40,7 +44,10 @@ export default function StyleguidePage() {
       <header className="space-y-2">
         <h1 className="font-display text-5xl font-bold">Styleguide</h1>
         <p className="text-ink-muted">
-          Dev only. {packs.length} pack loaded, {roundCount} rounds validated.
+          Dev only. {packs.length} pack loaded, {roundCount} rounds validated.{" "}
+          <Link href="/dev/match" className="font-semibold text-ink underline">
+            Open the match screen
+          </Link>
         </p>
       </header>
 
@@ -50,7 +57,7 @@ export default function StyleguidePage() {
           {SWATCHES.map(([token, label]) => (
             <div key={token} className="space-y-2">
               <div
-                className="h-16 rounded-md border-[3px] border-ink"
+                className="h-16 rounded-2xl shadow-panel"
                 style={{ background: `var(${token})` }}
               />
               <div className="text-sm font-semibold">{label}</div>
@@ -87,9 +94,21 @@ export default function StyleguidePage() {
 
       <section className="space-y-4">
         <h2 className="font-display text-2xl font-bold">Team panels</h2>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <TeamPanel side="a" name="Cohort A" options={["2", "6", "23", "undefined"]} />
-          <TeamPanel side="b" name="Cohort B" options={["2", "6", "23", "undefined"]} locked />
+        {/* match-stage supplies the size tokens the panels read (phone-size values here). */}
+        <div className="match-stage grid gap-6 md:grid-cols-3">
+          <TeamPanel
+            side="a"
+            name="Cohort A"
+            pulls={1}
+            answer={{ type: "mcq", options: ["2", "6", "23", "undefined"], correctIndex: 1 }}
+          />
+          <TeamPanel
+            side="b"
+            name="Cohort B"
+            locked
+            answer={{ type: "mcq", options: ["2", "6", "23", "undefined"], correctIndex: 1 }}
+          />
+          <TeamPanel side="a" name="You" pulls={2} answer={{ type: "text", accept: ["6"] }} />
         </div>
       </section>
     </main>
