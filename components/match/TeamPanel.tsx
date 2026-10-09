@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Zap } from "lucide-react";
+import { Check, X, Zap } from "lucide-react";
 import { motionTokens } from "@/lib/motion";
 import type { Answer } from "@/lib/types";
 import TeamMarker from "./TeamMarker";
@@ -49,6 +49,17 @@ interface TeamPanelProps {
   locked?: boolean;
   /** Fired by PULL: the chosen option index, or the typed text. */
   onAnswer?: (value: number | string) => void;
+  /** Controlled pick (from the engine, so keyboard and taps agree). Omit for local state. */
+  picked?: number | null;
+  onPick?: (index: number) => void;
+  /** True while the team is frozen after a wrong answer. */
+  cooling?: boolean;
+  /** Increments on each wrong answer; every change shakes the panel. */
+  wrongCount?: number;
+  /** During the reveal: highlights the right option. */
+  correctIndex?: number;
+  /** Robot side in solo mode: shown, but nobody can press its buttons. */
+  robot?: boolean;
 }
 
 export default function TeamPanel({
@@ -59,6 +70,12 @@ export default function TeamPanel({
   pullsToWin = 5,
   locked = false,
   onAnswer,
+  picked,
+  onPick,
+  cooling = false,
+  wrongCount = 0,
+  correctIndex,
+  robot = false,
 }: TeamPanelProps) {
   const s = SIDE[side];
   const reduced = useReducedMotion() ?? false;
@@ -101,13 +118,42 @@ export default function TeamPanel({
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-[var(--gap)] bg-arena/60 p-[var(--pad)]">
+      <motion.div
+        key={`wrong-${wrongCount}`}
+        initial={false}
+        animate={wrongCount > 0 && !reduced ? { x: [0, -12, 12, -8, 8, -3, 0] } : { x: 0 }}
+        transition={{ duration: 0.45 }}
+        className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap)] bg-arena/60 p-[var(--pad)]"
+      >
         {answer.type === "mcq" ? (
-          <McqAnswer key={answer.options.join("|")} options={answer.options} side={side} locked={locked} onPull={(i) => onAnswer?.(i)} />
+          <McqAnswer
+            key={answer.options.join("|")}
+            options={answer.options}
+            side={side}
+            locked={locked || cooling || robot}
+            picked={picked}
+            onPick={onPick}
+            correctIndex={correctIndex}
+            pullLabel={robot ? "Thinking…" : undefined}
+            onPull={(i) => onAnswer?.(i)}
+          />
         ) : (
-          <TextAnswer side={side} locked={locked} onPull={(v) => onAnswer?.(v)} />
+          <TextAnswer side={side} locked={locked || cooling || robot} onPull={(v) => onAnswer?.(v)} />
         )}
-      </div>
+
+        {cooling && (
+          <div
+            role="status"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-[calc(var(--gap)*0.5)] bg-surface/80 text-center backdrop-blur-[2px]"
+          >
+            <span className="flex size-[calc(var(--chip)*1.4)] items-center justify-center rounded-full bg-wrong text-white">
+              <X className="size-[60%]" strokeWidth={3.5} aria-hidden="true" />
+            </span>
+            <span className="font-display text-[length:var(--fs-option)] font-black text-ink">Not quite!</span>
+            <span className="text-[length:var(--fs-ui)] font-bold text-ink-muted">Wait a moment…</span>
+          </div>
+        )}
+      </motion.div>
     </section>
   );
 }
@@ -116,37 +162,59 @@ function McqAnswer({
   options,
   side,
   locked,
+  picked: controlledPick,
+  onPick,
+  correctIndex,
+  pullLabel,
   onPull,
 }: {
   options: string[];
   side: Side;
   locked: boolean;
+  picked?: number | null;
+  onPick?: (index: number) => void;
+  correctIndex?: number;
+  pullLabel?: string;
   onPull: (index: number) => void;
 }) {
   const s = SIDE[side];
-  const [picked, setPicked] = useState<number | null>(null);
-  useEffect(() => setPicked(null), [locked]);
+  const [localPick, setLocalPick] = useState<number | null>(null);
+  useEffect(() => setLocalPick(null), [locked]);
+  const controlled = onPick !== undefined;
+  const picked = controlled ? (controlledPick ?? null) : localPick;
+  const choose = (i: number) => (controlled ? onPick(i) : setLocalPick(i));
+  const revealing = correctIndex !== undefined;
 
   return (
     <>
       <div className="grid min-h-0 flex-1 grid-cols-2 gap-[var(--gap)] @3xl:grid-cols-1 @3xl:grid-rows-4">
         {options.map((option, i) => {
           const isPicked = picked === i;
+          const isRight = revealing && i === correctIndex;
+          const state = isRight
+            ? "border-correct bg-[#DCFCE7] shadow-[0_4px_0_var(--correct)]"
+            : revealing
+              ? "opacity-45"
+              : isPicked
+                ? s.picked
+                : "";
           return (
             <button
               key={i}
               type="button"
-              disabled={locked}
+              disabled={locked || revealing}
               aria-pressed={isPicked}
-              onClick={() => setPicked(i)}
-              className={`flex h-[var(--btn-h)] min-h-0 min-w-0 items-center gap-[var(--gap)] px-[calc(var(--gap)*0.8)] text-left font-sans text-[length:var(--fs-option)] font-extrabold text-ink disabled:opacity-50 ${KEYCAP} ${
-                isPicked ? s.picked : ""
-              } ${FOCUS_RING}`}
+              onClick={() => choose(i)}
+              className={`flex h-[var(--btn-h)] min-h-0 min-w-0 items-center gap-[var(--gap)] px-[calc(var(--gap)*0.8)] text-left font-sans text-[length:var(--fs-option)] font-extrabold text-ink ${
+                revealing ? "" : "disabled:opacity-50"
+              } ${KEYCAP} ${state} ${FOCUS_RING}`}
             >
               <span
-                className={`flex size-[calc(var(--chip)*0.8)] shrink-0 items-center justify-center rounded-[calc(var(--r-key)*0.6)] text-[length:var(--fs-ui)] font-black ${s.chip}`}
+                className={`flex size-[calc(var(--chip)*0.8)] shrink-0 items-center justify-center rounded-[calc(var(--r-key)*0.6)] text-[length:var(--fs-ui)] font-black ${
+                  isRight ? "bg-correct text-white" : s.chip
+                }`}
               >
-                {LETTERS[i]}
+                {isRight ? <Check className="size-[70%]" strokeWidth={3.5} aria-label="Correct" /> : LETTERS[i]}
               </span>
               <span className="min-w-0 truncate font-mono">{option}</span>
               <span className="ml-auto hidden text-[length:var(--fs-key)] font-bold text-ink-muted @3xl:inline">
@@ -156,7 +224,12 @@ function McqAnswer({
           );
         })}
       </div>
-      <PullButton side={side} disabled={locked || picked === null} onClick={() => picked !== null && onPull(picked)} />
+      <PullButton
+        side={side}
+        label={pullLabel}
+        disabled={locked || revealing || picked === null}
+        onClick={() => picked !== null && onPull(picked)}
+      />
     </>
   );
 }
@@ -208,8 +281,10 @@ function PullButton({
   onClick,
   type = "button",
   className = "",
+  label,
 }: {
   side: Side;
+  label?: string;
   disabled: boolean;
   onClick?: () => void;
   type?: "button" | "submit";
@@ -223,8 +298,12 @@ function PullButton({
       onClick={onClick}
       className={`relative flex h-[var(--pull-h)] shrink-0 items-center justify-center gap-[calc(var(--gap)*0.6)] rounded-[var(--r-key)] font-display text-[length:calc(var(--fs-option)*1.1)] font-black uppercase tracking-[0.06em] text-white transition-[transform,box-shadow,opacity] active:translate-y-[4px] active:shadow-none disabled:opacity-45 ${s.pull} ${FOCUS_RING} ${className}`}
     >
-      Pull
-      <Zap className="size-[1em] fill-focus text-focus" aria-hidden="true" />
+      {label ?? (
+        <>
+          Pull
+          <Zap className="size-[1em] fill-focus text-focus" aria-hidden="true" />
+        </>
+      )}
       <span className="absolute right-[calc(var(--gap)*0.8)] hidden text-[length:var(--fs-key)] font-bold normal-case tracking-normal text-white/70 @3xl:inline">
         {s.pullKey}
       </span>

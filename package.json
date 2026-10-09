@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "validate:packs": "tsx scripts/validate-packs.ts"
+    "validate:packs": "tsx scripts/validate-packs.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -25,6 +26,7 @@
     "postcss": "8.4.40",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "vitest": "^2.1.9"
   }
 }

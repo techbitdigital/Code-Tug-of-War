@@ -1,4 +1,4 @@
-import { CircleHelp, Pause, Timer, Volume2, VolumeX } from "lucide-react";
+import { CircleHelp, Pause, Play, Timer, Volume2, VolumeX } from "lucide-react";
 
 interface TopBarProps {
   round: number;
@@ -13,6 +13,10 @@ interface TopBarProps {
   onToggleSound?: () => void;
   onHelp?: () => void;
   onPause?: () => void;
+  /** Shows a Play icon on the pause button while paused. */
+  paused?: boolean;
+  /** Whole seconds left, read out to screen readers and shown in the last 5 seconds. */
+  secondsLeft?: number;
 }
 
 const PILL =
@@ -31,6 +35,8 @@ export default function TopBar({
   onToggleSound,
   onHelp,
   onPause,
+  paused = false,
+  secondsLeft,
 }: TopBarProps) {
   const pct = Math.round(Math.max(0, Math.min(1, timerFraction)) * 100);
 
@@ -56,13 +62,17 @@ export default function TopBar({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={pct}
+          aria-valuetext={secondsLeft !== undefined ? `${secondsLeft} seconds left` : undefined}
           className="h-[var(--timer-h)] w-[calc(var(--timer-w)*0.6)] overflow-hidden rounded-full bg-line @3xl:w-[var(--timer-w)]"
         >
           <div
-            className={`h-full rounded-full transition-[width] duration-300 ${timerLow ? "bg-wrong" : "bg-focus"}`}
+            className={`h-full rounded-full transition-[width] duration-100 ease-linear ${timerLow ? "bg-wrong" : "bg-focus"}`}
             style={{ width: `${pct}%` }}
           />
         </div>
+        {timerLow && secondsLeft !== undefined && (
+          <span className="w-[1.5em] text-right font-mono text-wrong">{secondsLeft}</span>
+        )}
       </div>
 
       <div className="flex items-center gap-[calc(var(--gap)*0.8)]">
@@ -82,8 +92,12 @@ export default function TopBar({
         <button type="button" className={`${ICON_BUTTON} hidden @3xl:flex`} onClick={onHelp} aria-label="Help">
           <CircleHelp className="size-[45%]" strokeWidth={2.5} aria-hidden="true" />
         </button>
-        <button type="button" className={ICON_BUTTON} onClick={onPause} aria-label="Pause">
-          <Pause className="size-[45%]" strokeWidth={2.5} aria-hidden="true" />
+        <button type="button" className={ICON_BUTTON} onClick={onPause} aria-label={paused ? "Resume" : "Pause"}>
+          {paused ? (
+            <Play className="size-[45%]" strokeWidth={2.5} aria-hidden="true" />
+          ) : (
+            <Pause className="size-[45%]" strokeWidth={2.5} aria-hidden="true" />
+          )}
         </button>
       </div>
     </header>
