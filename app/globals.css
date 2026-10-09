@@ -1,9 +1,83 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  background: #FAF9F5;
-  color: #141413;
+/* Colour tokens from the brief, verbatim. */
+:root {
+  --arena-bg: #F6F4EF;
+  --surface: #FFFFFF;
+  --ink: #14161F;
+  --ink-muted: #5B6070;
+  --line: #E3E0D8;
+  --team-a: #2F6BFF;
+  --team-a-soft: #E6EEFF;
+  --team-b: #FF6A3D;
+  --team-b-soft: #FFEDE6;
+  --correct: #16A34A;
+  --wrong: #E5484D;
+  --focus: #FFC93C;
+  --code-bg: #0F1220;
+  --code-ink: #E6E9F2;
+  --code-key: #7AA2FF;
+  --code-str: #8FE3A4;
+  --code-num: #FFB86B;
+  --code-fn: #C9A2FF;
+  --space: 8px; /* all spacing in multiples of 8 */
+}
+
+/* Expose the tokens as Tailwind utilities: bg-arena, text-ink, border-team-a, ... */
+@theme inline {
+  --color-arena: var(--arena-bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-team-a: var(--team-a);
+  --color-team-a-soft: var(--team-a-soft);
+  --color-team-b: var(--team-b);
+  --color-team-b-soft: var(--team-b-soft);
+  --color-correct: var(--correct);
+  --color-wrong: var(--wrong);
+  --color-focus: var(--focus);
+  --color-code-bg: var(--code-bg);
+  --color-code-ink: var(--code-ink);
+  --color-code-key: var(--code-key);
+  --color-code-str: var(--code-str);
+  --color-code-num: var(--code-num);
+  --color-code-fn: var(--code-fn);
+
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+/* Radius, shadow and type scale live only here: Tailwind owns these names. */
+@theme {
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-panel: 0 8px 0 rgba(20, 22, 31, 0.12);
+
+  /* Brief sizes at 1280x720, scaled with vw so a 1920 smartboard gets ~1.5x. */
+  --text-display: clamp(56px, 7.5vw, 240px);
+  --text-prompt: clamp(22px, 3.125vw, 80px);
+  --text-code: clamp(16px, 2.5vw, 64px);
+  --text-option: clamp(16px, 1.875vw, 48px);
+  --text-name: clamp(18px, 2.1875vw, 56px);
+  --text-body: clamp(16px, 1.25vw, 28px);
+}
+
+@layer base {
+  body {
+    background: var(--arena-bg);
+    color: var(--ink);
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

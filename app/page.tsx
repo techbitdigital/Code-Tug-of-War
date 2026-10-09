@@ -1,24 +1,21 @@
 import Link from "next/link";
-import { getAllRounds } from "@/lib/rounds";
 
 export default function HomePage() {
-  const rounds = getAllRounds();
-
   return (
-    <main className="min-h-screen p-10 flex flex-col gap-6">
-      <h1 className="text-3xl font-bold">Code Tug of War — Phase 1</h1>
-      <p className="text-[#57534E] max-w-md">
-        Pick a round to play through the watch → predict → reveal loop.
+    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-6 p-8">
+      <p className="font-display text-sm font-bold uppercase tracking-[0.12em] text-ink-muted">
+        Code Tug of War
       </p>
-      <ul className="flex flex-col gap-2">
-        {rounds.map((round) => (
-          <li key={round.id}>
-            <Link href={`/round/${round.id}`} className="underline font-mono text-[#2F6FED]">
-              {round.title}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <h1 className="font-display text-5xl font-bold">
+        See what happens beneath every line of code.
+      </h1>
+      <p className="text-lg text-ink-muted">
+        The match screen is next (Step 2). For now, the styleguide shows the design tokens and
+        team panels.
+      </p>
+      <Link href="/dev/styleguide" className="font-semibold underline">
+        Open the styleguide
+      </Link>
     </main>
   );
 }

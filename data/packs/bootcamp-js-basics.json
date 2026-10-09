@@ -1,0 +1,80 @@
+{
+  "id": "bootcamp-js-basics",
+  "title": "JavaScript Basics: Variables, Loops, Functions",
+  "segment": ["bootcamp", "general"],
+  "track": "beginner",
+  "estMinutes": 5,
+  "rounds": [
+    {
+      "id": "js-var-01",
+      "concept": "variable declaration",
+      "prompt": "What is stored in age after this line runs?",
+      "code": { "lang": "js", "lines": ["let age = 24;"], "focusLine": 0 },
+      "answer": { "type": "mcq", "options": ["undefined", "24", "'24'", "0"], "correctIndex": 1 },
+      "reveal": [
+        { "line": 0, "layer": "runtime", "say": "The engine reserves a named box in memory called age." },
+        { "line": 0, "layer": "memory", "memory": [{ "name": "age", "value": "24", "changed": true }], "say": "It stores the number 24 in that box." }
+      ]
+    },
+    {
+      "id": "js-let-01",
+      "concept": "variable reassignment",
+      "prompt": "What does this print?",
+      "code": { "lang": "js", "lines": ["let x = 2;", "x = x * 3;", "console.log(x);"], "focusLine": 1 },
+      "answer": { "type": "mcq", "options": ["2", "6", "23", "undefined"], "correctIndex": 1 },
+      "reveal": [
+        { "line": 0, "layer": "memory", "memory": [{ "name": "x", "value": "2", "changed": true }], "say": "The engine makes a box called x and stores 2." },
+        { "line": 1, "layer": "runtime", "memory": [{ "name": "x", "value": "6", "changed": true }], "say": "It reads x, multiplies by 3, and writes 6 back into the same box." },
+        { "line": 2, "layer": "output", "output": "6", "say": "console.log reads the box and prints 6." }
+      ]
+    },
+    {
+      "id": "js-loop-01",
+      "concept": "for loop accumulation",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let score = 0;",
+          "for (let i = 0; i < 3; i++) {",
+          "  score = score + 2;",
+          "}",
+          "console.log(score);"
+        ],
+        "focusLine": 2
+      },
+      "answer": { "type": "mcq", "options": ["2", "4", "6", "8"], "correctIndex": 2 },
+      "reveal": [
+        { "line": 0, "layer": "memory", "memory": [{ "name": "score", "value": "0", "changed": true }], "say": "score is created and starts at 0." },
+        { "line": 1, "layer": "runtime", "memory": [{ "name": "score", "value": "0" }, { "name": "i", "value": "0", "changed": true }], "say": "The loop creates i = 0 and checks i < 3. It is true, so the body runs." },
+        { "line": 2, "layer": "memory", "memory": [{ "name": "score", "value": "2", "changed": true }, { "name": "i", "value": "0" }], "say": "Pass 1: score = 0 + 2, so score becomes 2." },
+        { "line": 2, "layer": "memory", "memory": [{ "name": "score", "value": "4", "changed": true }, { "name": "i", "value": "1", "changed": true }], "say": "Pass 2: i++ made i = 1, the check passes, and score becomes 4." },
+        { "line": 2, "layer": "memory", "memory": [{ "name": "score", "value": "6", "changed": true }, { "name": "i", "value": "2", "changed": true }], "say": "Pass 3: i is 2 and score becomes 6. Then i becomes 3, i < 3 is false, and the loop stops." },
+        { "line": 4, "layer": "output", "output": "6", "say": "console.log prints the final value: 6." }
+      ]
+    },
+    {
+      "id": "js-fn-01",
+      "concept": "function call and return",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "function double(n) {",
+          "  return n * 2;",
+          "}",
+          "let result = double(5);",
+          "console.log(result);"
+        ],
+        "focusLine": 3
+      },
+      "answer": { "type": "mcq", "options": ["5", "10", "undefined", "n * 2"], "correctIndex": 1 },
+      "reveal": [
+        { "line": 3, "layer": "runtime", "stack": ["double(5)", "global"], "say": "Calling double(5) pushes a new frame onto the call stack." },
+        { "line": 1, "layer": "memory", "memory": [{ "name": "n", "value": "5", "changed": true }], "stack": ["double(5)", "global"], "say": "Inside the frame, n holds 5, so n * 2 works out to 10." },
+        { "line": 3, "layer": "memory", "memory": [{ "name": "result", "value": "10", "changed": true }], "stack": ["global"], "say": "The frame pops off the stack and returns 10, which is stored in result." },
+        { "line": 4, "layer": "output", "output": "10", "say": "console.log prints 10." }
+      ]
+    }
+  ]
+}
