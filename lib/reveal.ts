@@ -7,6 +7,10 @@ export interface MemoryBox {
   name: string;
   value: string;
   changed: boolean;
+  /** Box group: "global", a call frame like "double(5)", or "loop". */
+  scope: string;
+  /** Declared but not ready yet (temporal dead zone). */
+  uninitialized: boolean;
 }
 
 export interface RevealStep {
@@ -20,6 +24,8 @@ export interface RevealStep {
   console: string[];
   /** True when this step printed something new. */
   printed: boolean;
+  /** What the engine works out on this step (not carried over). */
+  eval: string[];
 }
 
 export function buildRevealSteps(frames: RevealFrame[]): RevealStep[] {
@@ -31,7 +37,13 @@ export function buildRevealSteps(frames: RevealFrame[]): RevealStep[] {
 
   for (const frame of frames) {
     memory = frame.memory
-      ? frame.memory.map((m) => ({ name: m.name, value: m.value, changed: m.changed ?? false }))
+      ? frame.memory.map((m) => ({
+          name: m.name,
+          value: m.value,
+          changed: m.changed ?? false,
+          scope: m.scope ?? "global",
+          uninitialized: m.uninitialized ?? false,
+        }))
       : memory.map((m) => ({ ...m, changed: false }));
     if (frame.stack) stack = frame.stack;
     if (frame.output !== undefined) console.push(frame.output);
@@ -44,7 +56,19 @@ export function buildRevealSteps(frames: RevealFrame[]): RevealStep[] {
       stack,
       console: [...console],
       printed: frame.output !== undefined,
+      eval: frame.eval ?? [],
     });
   }
   return steps;
+}
+
+/** Boxes grouped by scope, in the order the scopes first appear. */
+export function groupByScope(memory: MemoryBox[]): { scope: string; boxes: MemoryBox[] }[] {
+  const groups: { scope: string; boxes: MemoryBox[] }[] = [];
+  for (const box of memory) {
+    let group = groups.find((g) => g.scope === box.scope);
+    if (!group) groups.push((group = { scope: box.scope, boxes: [] }));
+    group.boxes.push(box);
+  }
+  return groups;
 }

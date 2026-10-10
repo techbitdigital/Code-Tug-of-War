@@ -97,6 +97,7 @@
    so the layout is identical at 1280x720, 1920x1080 and anything in between.
    --------------------------------------------------------------------------- */
 .match-shell {
+  isolation: isolate; /* stage z-indexes stay below dialogs */
   display: flex;
   min-height: 100dvh;
   align-items: center;
@@ -119,14 +120,61 @@
   }
 }
 
-/* Full-screen layer for dialogs, portalled to <body>. It is its own size container, so
-   dialogs get the same size tokens without being trapped inside the stage (a container
-   with layout containment would otherwise capture position: fixed). */
-.match-portal {
+/* Dialogs (ready, paused, results) are portalled to <body> and styled with plain CSS,
+   so nothing on the stage can ever sit on top of them, in any browser. Their size
+   tokens scale with the viewport instead of the stage. */
+.match-dialog-layer {
   position: fixed;
   inset: 0;
-  z-index: 40;
-  container-type: inline-size;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(27 31 59 / 0.35);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  --fs-prompt: clamp(22px, 2.5vw, 56px);
+  --fs-option: clamp(17px, 1.875vw, 40px);
+  --fs-ui: clamp(14px, 1.25vw, 28px);
+  --fs-key: clamp(11px, 0.9375vw, 20px);
+  --pad: clamp(14px, 1.5625vw, 32px);
+  --gap: clamp(10px, 0.9375vw, 20px);
+  --pull-h: clamp(56px, 5vw, 96px);
+  --chip: clamp(32px, 3.125vw, 64px);
+  --r-card: clamp(22px, 2.1875vw, 40px);
+  --r-key: clamp(14px, 1.25vw, 24px);
+  --fs-code: clamp(14px, 1.6vw, 36px);
+  --fs-name: clamp(18px, 1.875vw, 40px);
+  --btn-h: auto;
+  --bar-h: clamp(44px, 3.75vw, 72px);
+  --arena-h: clamp(140px, 16vw, 280px);
+}
+/* The 3-2-1: lighter, so it feels like part of the stage. */
+.match-dialog-layer--light {
+  background: rgb(243 244 250 / 0.55);
+}
+/* Replaying a reveal from the results: a big sheet instead of a card. */
+.match-dialog-layer--sheet {
+  padding: clamp(8px, 2vw, 32px);
+}
+.match-replay {
+  width: min(100%, 80rem);
+  height: min(100%, 46rem);
+  overflow-y: auto;
+}
+.match-dialog-card--wide {
+  width: min(100%, 60rem) !important;
+}
+.match-dialog-card {
+  width: min(100%, 36rem);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+@media (min-width: 768px) {
+  .match-dialog-card {
+    width: min(100%, clamp(36rem, 50vw, 64rem));
+  }
 }
 
 /* Size tokens, phone values first. Stage values are px at the 1280x720 reference. */

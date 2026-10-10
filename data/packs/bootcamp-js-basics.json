@@ -1,31 +1,166 @@
 {
   "id": "bootcamp-js-basics",
   "title": "JavaScript Basics: Variables, Loops, Functions",
-  "segment": ["bootcamp", "general"],
+  "segment": [
+    "bootcamp",
+    "general"
+  ],
   "track": "beginner",
-  "estMinutes": 5,
+  "estMinutes": 6,
   "rounds": [
     {
       "id": "js-var-01",
       "concept": "variable declaration",
       "prompt": "What is stored in age after this line runs?",
-      "code": { "lang": "js", "lines": ["let age = 24;"], "focusLine": 0 },
-      "answer": { "type": "mcq", "options": ["undefined", "24", "'24'", "0"], "correctIndex": 1 },
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let age = 24;"
+        ],
+        "focusLine": 0
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "undefined",
+          "24",
+          "'24'",
+          "0"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "undefined is what a box holds when it gets no value, like let age; on its own. Here age is given 24.",
+          "",
+          "'24' with quotes is a string (text). 24 without quotes is a number.",
+          "Nothing sets age to 0. The value on the right of = is what gets stored."
+        ]
+      },
       "reveal": [
-        { "line": 0, "layer": "runtime", "say": "The engine reserves a named box in memory called age." },
-        { "line": 0, "layer": "memory", "memory": [{ "name": "age", "value": "24", "changed": true }], "say": "It stores the number 24 in that box." }
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "age",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before any line runs, the engine scans the code and makes a box called age. It isn't ready to use yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "24"
+          ],
+          "memory": [
+            {
+              "name": "age",
+              "value": "24",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1 runs: the engine works out the value 24 and stores it, so age holds 24. Now age can be used."
+        }
       ]
     },
     {
       "id": "js-let-01",
       "concept": "variable reassignment",
       "prompt": "What does this print?",
-      "code": { "lang": "js", "lines": ["let x = 2;", "x = x * 3;", "console.log(x);"], "focusLine": 1 },
-      "answer": { "type": "mcq", "options": ["2", "6", "23", "undefined"], "correctIndex": 1 },
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let x = 2;",
+          "x = x * 3;",
+          "console.log(x);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "2",
+          "6",
+          "23",
+          "undefined"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "2 was the first value, but line 2 replaces it with x * 3.",
+          "",
+          "* means multiply, not join. x * 3 is 2 × 3 = 6, not \"2\" followed by \"3\".",
+          "x has a value by the time it is printed, so it isn't undefined."
+        ]
+      },
       "reveal": [
-        { "line": 0, "layer": "memory", "memory": [{ "name": "x", "value": "2", "changed": true }], "say": "The engine makes a box called x and stores 2." },
-        { "line": 1, "layer": "runtime", "memory": [{ "name": "x", "value": "6", "changed": true }], "say": "It reads x, multiplies by 3, and writes 6 back into the same box." },
-        { "line": 2, "layer": "output", "output": "6", "say": "console.log reads the box and prints 6." }
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "x",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called x. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "2"
+          ],
+          "memory": [
+            {
+              "name": "x",
+              "value": "2",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: x is created with the value 2."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "x * 3",
+            "2 * 3",
+            "6"
+          ],
+          "memory": [
+            {
+              "name": "x",
+              "value": "6",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: the engine reads x (2), multiplies by 3, and writes 6 back into the same box."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "x",
+            "6"
+          ],
+          "output": "6",
+          "memory": [
+            {
+              "name": "x",
+              "value": "6",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: console.log reads x and prints 6."
+        }
       ]
     },
     {
@@ -43,14 +178,233 @@
         ],
         "focusLine": 2
       },
-      "answer": { "type": "mcq", "options": ["2", "4", "6", "8"], "correctIndex": 2 },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "2",
+          "4",
+          "6",
+          "8"
+        ],
+        "correctIndex": 2,
+        "why": [
+          "2 is the score after the first pass, but the body runs 3 times.",
+          "4 is the score after two passes. The loop runs for i = 0, 1 and 2: three passes.",
+          "",
+          "8 would need 4 passes. When i reaches 3, i < 3 is false and the loop stops."
+        ]
+      },
       "reveal": [
-        { "line": 0, "layer": "memory", "memory": [{ "name": "score", "value": "0", "changed": true }], "say": "score is created and starts at 0." },
-        { "line": 1, "layer": "runtime", "memory": [{ "name": "score", "value": "0" }, { "name": "i", "value": "0", "changed": true }], "say": "The loop creates i = 0 and checks i < 3. It is true, so the body runs." },
-        { "line": 2, "layer": "memory", "memory": [{ "name": "score", "value": "2", "changed": true }, { "name": "i", "value": "0" }], "say": "Pass 1: score = 0 + 2, so score becomes 2." },
-        { "line": 2, "layer": "memory", "memory": [{ "name": "score", "value": "4", "changed": true }, { "name": "i", "value": "1", "changed": true }], "say": "Pass 2: i++ made i = 1, the check passes, and score becomes 4." },
-        { "line": 2, "layer": "memory", "memory": [{ "name": "score", "value": "6", "changed": true }, { "name": "i", "value": "2", "changed": true }], "say": "Pass 3: i is 2 and score becomes 6. Then i becomes 3, i < 3 is false, and the loop stops." },
-        { "line": 4, "layer": "output", "output": "6", "say": "console.log prints the final value: 6." }
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "score",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box for score. There is no i yet: i belongs to the loop."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "0"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "0",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: score is created and set to 0."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "i < 3",
+            "0 < 3",
+            "true"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "0",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "0",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: the loop makes its own box i = 0, then checks i < 3. It's true, so the body runs."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "eval": [
+            "score + 2",
+            "0 + 2",
+            "2"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "2",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "i",
+              "value": "0",
+              "scope": "loop"
+            }
+          ],
+          "say": "Pass 1: the engine works out 0 + 2, so score becomes 2."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "i++",
+            "i < 3",
+            "1 < 3",
+            "true"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "2",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "1",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Back to line 2: i++ makes i = 1. The check is true again, so the body runs."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "eval": [
+            "score + 2",
+            "2 + 2",
+            "4"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "4",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "i",
+              "value": "1",
+              "scope": "loop"
+            }
+          ],
+          "say": "Pass 2: score becomes 4."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "i++",
+            "i < 3",
+            "2 < 3",
+            "true"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "4",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "2",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Line 2 again: i++ makes i = 2. Still true, so one more pass."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "eval": [
+            "score + 2",
+            "4 + 2",
+            "6"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "6",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "i",
+              "value": "2",
+              "scope": "loop"
+            }
+          ],
+          "say": "Pass 3: score becomes 6."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "i++",
+            "i < 3",
+            "3 < 3",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "6",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "3",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: i++ makes i = 3. Now the check is false, so the loop stops."
+        },
+        {
+          "line": 4,
+          "layer": "output",
+          "eval": [
+            "score",
+            "6"
+          ],
+          "output": "6",
+          "memory": [
+            {
+              "name": "score",
+              "value": "6",
+              "scope": "global"
+            }
+          ],
+          "say": "The loop is finished, so its box i is thrown away. Line 5 prints score: 6."
+        }
       ]
     },
     {
@@ -68,12 +422,155 @@
         ],
         "focusLine": 3
       },
-      "answer": { "type": "mcq", "options": ["5", "10", "undefined", "n * 2"], "correctIndex": 1 },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "5",
+          "10",
+          "undefined",
+          "n * 2"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "5 is what goes in (n). The function returns n * 2, so 10 comes out.",
+          "",
+          "double has a return, so result gets the returned value, not undefined.",
+          "n * 2 is the instruction, not the answer. The engine works it out (5 * 2) before returning."
+        ]
+      },
       "reveal": [
-        { "line": 3, "layer": "runtime", "stack": ["double(5)", "global"], "say": "Calling double(5) pushes a new frame onto the call stack." },
-        { "line": 1, "layer": "memory", "memory": [{ "name": "n", "value": "5", "changed": true }], "stack": ["double(5)", "global"], "say": "Inside the frame, n holds 5, so n * 2 works out to 10." },
-        { "line": 3, "layer": "memory", "memory": [{ "name": "result", "value": "10", "changed": true }], "stack": ["global"], "say": "The frame pops off the stack and returns 10, which is stored in result." },
-        { "line": 4, "layer": "output", "output": "10", "say": "console.log prints 10." }
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "double",
+              "value": "ƒ double(n)",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "result",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine stores the whole function double, and makes a box for result that isn't ready yet."
+        },
+        {
+          "line": 3,
+          "layer": "runtime",
+          "stack": [
+            "double(5)",
+            "global"
+          ],
+          "eval": [
+            "double(5)"
+          ],
+          "memory": [
+            {
+              "name": "double",
+              "value": "ƒ double(n)",
+              "scope": "global"
+            },
+            {
+              "name": "result",
+              "value": "",
+              "scope": "global",
+              "uninitialized": true
+            },
+            {
+              "name": "n",
+              "value": "5",
+              "scope": "double(5)",
+              "changed": true
+            }
+          ],
+          "say": "Line 4 calls double(5). A new frame goes on top of the call stack, with its own box n = 5."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "stack": [
+            "double(5)",
+            "global"
+          ],
+          "eval": [
+            "n * 2",
+            "5 * 2",
+            "10"
+          ],
+          "memory": [
+            {
+              "name": "double",
+              "value": "ƒ double(n)",
+              "scope": "global"
+            },
+            {
+              "name": "result",
+              "value": "",
+              "scope": "global",
+              "uninitialized": true
+            },
+            {
+              "name": "n",
+              "value": "5",
+              "scope": "double(5)"
+            }
+          ],
+          "say": "Inside the frame, line 2 works out n * 2. That's 5 * 2, so it returns 10."
+        },
+        {
+          "line": 3,
+          "layer": "memory",
+          "stack": [
+            "global"
+          ],
+          "eval": [
+            "double(5)",
+            "10"
+          ],
+          "memory": [
+            {
+              "name": "double",
+              "value": "ƒ double(n)",
+              "scope": "global"
+            },
+            {
+              "name": "result",
+              "value": "10",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "The frame pops off the stack and its box n goes with it. Back on line 4, result = 10."
+        },
+        {
+          "line": 4,
+          "layer": "output",
+          "stack": [
+            "global"
+          ],
+          "eval": [
+            "result",
+            "10"
+          ],
+          "output": "10",
+          "memory": [
+            {
+              "name": "double",
+              "value": "ƒ double(n)",
+              "scope": "global"
+            },
+            {
+              "name": "result",
+              "value": "10",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 5: console.log prints result: 10."
+        }
       ]
     }
   ]

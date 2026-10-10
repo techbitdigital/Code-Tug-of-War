@@ -105,7 +105,8 @@ export default function StyleguidePage() {
           <TeamPanel
             side="b"
             name="Cohort B"
-            locked
+            status="locked-in"
+            lockedSeconds={4.2}
             answer={{ type: "mcq", options: ["2", "6", "23", "undefined"], correctIndex: 1 }}
           />
           <TeamPanel side="a" name="You" pulls={2} answer={{ type: "text", accept: ["6"] }} />

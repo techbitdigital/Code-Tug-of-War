@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check, X, Zap } from "lucide-react";
+import { Check, Lock, X, Zap } from "lucide-react";
 import { motionTokens } from "@/lib/motion";
 import type { Answer } from "@/lib/types";
 import TeamMarker from "./TeamMarker";
 
 export type Side = "a" | "b";
+
+/**
+ * hidden    before the question starts: options masked
+ * open      answering
+ * locked-in this team has answered; shows "Locked in" without saying right or wrong
+ * reveal    round over: right answer in green, this team's wrong pick in red
+ * idle      nothing to do (paused)
+ */
+export type PanelStatus = "hidden" | "open" | "locked-in" | "reveal" | "idle";
 
 // Full class strings so Tailwind can see them.
 const SIDE = {
@@ -17,8 +26,7 @@ const SIDE = {
     chip: "bg-team-a text-white",
     picked: "border-team-a bg-team-a-soft shadow-[0_4px_0_var(--team-a)]",
     pull: "bg-gradient-to-b from-team-a-bright to-team-a shadow-[0_5px_0_var(--team-a-deep)]",
-    keys: ["1", "2", "3", "4"],
-    pullKey: "Space",
+    lockBadge: "bg-team-a",
   },
   b: {
     head: "bg-gradient-to-br from-team-b-bright to-team-b",
@@ -26,8 +34,7 @@ const SIDE = {
     chip: "bg-team-b text-white",
     picked: "border-team-b bg-team-b-soft shadow-[0_4px_0_var(--team-b)]",
     pull: "bg-gradient-to-b from-team-b-bright to-team-b shadow-[0_5px_0_var(--team-b-deep)]",
-    keys: ["7", "8", "9", "0"],
-    pullKey: "Enter",
+    lockBadge: "bg-team-b",
   },
 } as const;
 
@@ -43,23 +50,25 @@ interface TeamPanelProps {
   side: Side;
   name: string;
   answer: Answer;
-  /** Pulls this team has won so far, shown as the meter under the name. */
+  /** How far the rope leans toward this team (the pips under the name). */
   pulls?: number;
   pullsToWin?: number;
-  locked?: boolean;
-  /** Fired by PULL: the chosen option index, or the typed text. */
+  status?: PanelStatus;
+  /** Fired by "Lock in": the chosen option index, or the typed text. */
   onAnswer?: (value: number | string) => void;
   /** Controlled pick (from the engine, so keyboard and taps agree). Omit for local state. */
   picked?: number | null;
   onPick?: (index: number) => void;
-  /** True while the team is frozen after a wrong answer. */
-  cooling?: boolean;
-  /** Increments on each wrong answer; every change shakes the panel. */
-  wrongCount?: number;
-  /** During the reveal: highlights the right option. */
-  correctIndex?: number;
+  /** Keyboard hints shown on the stage: four pick keys and the lock key. */
+  keyHints?: { pick: string[]; lock: string };
+  /** Seconds this team took to lock in (shown on the "Locked in" card). */
+  lockedSeconds?: number;
+  /** During the reveal: what this team answered (index or text), if anything. */
+  revealValue?: number | string | null;
   /** Robot side in solo mode: shown, but nobody can press its buttons. */
   robot?: boolean;
+  /** Name shown in "Waiting for …" once this team has locked in. */
+  opponentName?: string;
 }
 
 export default function TeamPanel({
@@ -68,17 +77,19 @@ export default function TeamPanel({
   answer,
   pulls = 0,
   pullsToWin = 5,
-  locked = false,
+  status = "open",
   onAnswer,
   picked,
   onPick,
-  cooling = false,
-  wrongCount = 0,
-  correctIndex,
+  keyHints,
+  lockedSeconds,
+  revealValue,
   robot = false,
+  opponentName,
 }: TeamPanelProps) {
   const s = SIDE[side];
   const reduced = useReducedMotion() ?? false;
+  const disabled = status !== "open" || robot;
 
   return (
     <section
@@ -94,12 +105,12 @@ export default function TeamPanel({
         </div>
         <div
           className={`flex items-center justify-center gap-[calc(var(--gap)*0.6)] py-[calc(var(--gap)*0.8)] ${s.band}`}
-          aria-label={`${pulls} of ${pullsToWin} pulls`}
+          aria-label={`Rope ${pulls} of ${pullsToWin} steps toward ${name}`}
         >
           {Array.from({ length: pullsToWin }, (_, i) => {
             const won = i < pulls;
             return (
-              // Each pull "pops" its marker in.
+              // Each step "pops" its marker in.
               <motion.span
                 key={i}
                 className="flex"
@@ -118,42 +129,52 @@ export default function TeamPanel({
         </div>
       </header>
 
-      <motion.div
-        key={`wrong-${wrongCount}`}
-        initial={false}
-        animate={wrongCount > 0 && !reduced ? { x: [0, -12, 12, -8, 8, -3, 0] } : { x: 0 }}
-        transition={{ duration: 0.45 }}
-        className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap)] bg-arena/60 p-[var(--pad)]"
-      >
+      <div className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap)] bg-arena/60 p-[var(--pad)]">
         {answer.type === "mcq" ? (
           <McqAnswer
             key={answer.options.join("|")}
             options={answer.options}
             side={side}
-            locked={locked || cooling || robot}
+            status={status}
+            disabled={disabled}
             picked={picked}
             onPick={onPick}
-            correctIndex={correctIndex}
-            pullLabel={robot ? "Thinking…" : undefined}
-            onPull={(i) => onAnswer?.(i)}
+            correctIndex={answer.correctIndex}
+            revealValue={revealValue}
+            keyHints={keyHints}
+            lockLabel={robot ? "Thinking…" : undefined}
+            onLock={(i) => onAnswer?.(i)}
           />
         ) : (
-          <TextAnswer side={side} locked={locked || cooling || robot} onPull={(v) => onAnswer?.(v)} />
+          <TextAnswer side={side} disabled={disabled} keyHint={keyHints?.lock} onLock={(v) => onAnswer?.(v)} />
         )}
 
-        {cooling && (
-          <div
+        {/* Locked in: covers the options so the other team can't see the choice. */}
+        {status === "locked-in" && (
+          <motion.div
             role="status"
-            className="absolute inset-0 flex flex-col items-center justify-center gap-[calc(var(--gap)*0.5)] bg-surface/80 text-center backdrop-blur-[2px]"
+            initial={reduced ? false : { opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={motionTokens.snap}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-[calc(var(--gap)*0.5)] bg-surface/90 text-center backdrop-blur-[3px]"
           >
-            <span className="flex size-[calc(var(--chip)*1.4)] items-center justify-center rounded-full bg-wrong text-white">
-              <X className="size-[60%]" strokeWidth={3.5} aria-hidden="true" />
+            <span className={`flex size-[calc(var(--chip)*1.5)] items-center justify-center rounded-full text-white ${s.lockBadge}`}>
+              <Lock className="size-[50%]" strokeWidth={3} aria-hidden="true" />
             </span>
-            <span className="font-display text-[length:var(--fs-option)] font-black text-ink">Not quite!</span>
-            <span className="text-[length:var(--fs-ui)] font-bold text-ink-muted">Wait a moment…</span>
-          </div>
+            <span className="font-display text-[length:var(--fs-option)] font-black text-ink">
+              {robot ? `${name} locked in` : "Locked in!"}
+            </span>
+            {lockedSeconds !== undefined && (
+              <span className="text-[length:var(--fs-ui)] font-extrabold text-ink-muted">in {lockedSeconds.toFixed(1)}s</span>
+            )}
+            {opponentName && (
+              <span className="text-[length:var(--fs-key)] font-bold text-ink-muted @3xl:text-[length:var(--fs-ui)]">
+                Waiting for {opponentName}…
+              </span>
+            )}
+          </motion.div>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }
@@ -161,29 +182,35 @@ export default function TeamPanel({
 function McqAnswer({
   options,
   side,
-  locked,
+  status,
+  disabled,
   picked: controlledPick,
   onPick,
   correctIndex,
-  pullLabel,
-  onPull,
+  revealValue,
+  keyHints,
+  lockLabel,
+  onLock,
 }: {
   options: string[];
   side: Side;
-  locked: boolean;
+  status: PanelStatus;
+  disabled: boolean;
   picked?: number | null;
   onPick?: (index: number) => void;
-  correctIndex?: number;
-  pullLabel?: string;
-  onPull: (index: number) => void;
+  correctIndex: number;
+  revealValue?: number | string | null;
+  keyHints?: { pick: string[]; lock: string };
+  lockLabel?: string;
+  onLock: (index: number) => void;
 }) {
   const s = SIDE[side];
   const [localPick, setLocalPick] = useState<number | null>(null);
-  useEffect(() => setLocalPick(null), [locked]);
   const controlled = onPick !== undefined;
   const picked = controlled ? (controlledPick ?? null) : localPick;
   const choose = (i: number) => (controlled ? onPick(i) : setLocalPick(i));
-  const revealing = correctIndex !== undefined;
+  const revealing = status === "reveal";
+  const hidden = status === "hidden";
 
   return (
     <>
@@ -191,50 +218,72 @@ function McqAnswer({
         {options.map((option, i) => {
           const isPicked = picked === i;
           const isRight = revealing && i === correctIndex;
-          const state = isRight
+          const isTheirWrongPick = revealing && revealValue === i && i !== correctIndex;
+          const look = isRight
             ? "border-correct bg-[#DCFCE7] shadow-[0_4px_0_var(--correct)]"
-            : revealing
-              ? "opacity-45"
-              : isPicked
-                ? s.picked
-                : "";
+            : isTheirWrongPick
+              ? "border-wrong bg-[#FEE2E2] shadow-[0_4px_0_var(--wrong)]"
+              : revealing
+                ? "opacity-45"
+                : isPicked && !hidden
+                  ? s.picked
+                  : "";
           return (
             <button
               key={i}
               type="button"
-              disabled={locked || revealing}
+              disabled={disabled}
               aria-pressed={isPicked}
               onClick={() => choose(i)}
               className={`flex h-[var(--btn-h)] min-h-0 min-w-0 items-center gap-[var(--gap)] px-[calc(var(--gap)*0.8)] text-left font-sans text-[length:var(--fs-option)] font-extrabold text-ink ${
-                revealing ? "" : "disabled:opacity-50"
-              } ${KEYCAP} ${state} ${FOCUS_RING}`}
+                revealing || status === "locked-in" ? "" : "disabled:opacity-60"
+              } ${KEYCAP} ${look} ${FOCUS_RING}`}
             >
               <span
                 className={`flex size-[calc(var(--chip)*0.8)] shrink-0 items-center justify-center rounded-[calc(var(--r-key)*0.6)] text-[length:var(--fs-ui)] font-black ${
-                  isRight ? "bg-correct text-white" : s.chip
+                  isRight ? "bg-correct text-white" : isTheirWrongPick ? "bg-wrong text-white" : s.chip
                 }`}
               >
-                {isRight ? <Check className="size-[70%]" strokeWidth={3.5} aria-label="Correct" /> : LETTERS[i]}
+                {isRight ? (
+                  <Check className="size-[70%]" strokeWidth={3.5} aria-label="Correct" />
+                ) : isTheirWrongPick ? (
+                  <X className="size-[70%]" strokeWidth={3.5} aria-label="Your answer, wrong" />
+                ) : (
+                  LETTERS[i]
+                )}
               </span>
-              <span className="min-w-0 truncate font-mono">{option}</span>
-              <span className="ml-auto hidden text-[length:var(--fs-key)] font-bold text-ink-muted @3xl:inline">
-                {s.keys[i]}
-              </span>
+              <span className="min-w-0 truncate font-mono">{hidden ? "• • •" : option}</span>
+              {keyHints && !revealing && (
+                <span className="ml-auto hidden rounded-md bg-arena px-1.5 text-[length:var(--fs-key)] font-black uppercase text-ink-muted @3xl:inline">
+                  {keyHints.pick[i]}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
-      <PullButton
+      <LockButton
         side={side}
-        label={pullLabel}
-        disabled={locked || revealing || picked === null}
-        onClick={() => picked !== null && onPull(picked)}
+        label={lockLabel}
+        keyHint={keyHints?.lock}
+        disabled={disabled || picked === null}
+        onClick={() => picked !== null && onLock(picked)}
       />
     </>
   );
 }
 
-function TextAnswer({ side, locked, onPull }: { side: Side; locked: boolean; onPull: (value: string) => void }) {
+function TextAnswer({
+  side,
+  disabled,
+  keyHint,
+  onLock,
+}: {
+  side: Side;
+  disabled: boolean;
+  keyHint?: string;
+  onLock: (value: string) => void;
+}) {
   const [value, setValue] = useState("");
   const trimmed = value.trim();
 
@@ -243,16 +292,15 @@ function TextAnswer({ side, locked, onPull }: { side: Side; locked: boolean; onP
       className="flex flex-col gap-[var(--gap)] @3xl:flex-1"
       onSubmit={(event) => {
         event.preventDefault();
-        if (locked || !trimmed) return;
-        onPull(trimmed);
-        setValue("");
+        if (disabled || !trimmed) return;
+        onLock(trimmed);
       }}
     >
       <input
         aria-label="Your answer"
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        disabled={locked}
+        disabled={disabled}
         autoComplete="off"
         autoCapitalize="off"
         spellCheck={false}
@@ -262,29 +310,31 @@ function TextAnswer({ side, locked, onPull }: { side: Side; locked: boolean; onP
       <div className="mt-auto flex gap-[var(--gap)]">
         <button
           type="button"
-          disabled={locked || !value}
+          disabled={disabled || !value}
           onClick={() => setValue("")}
           className={`h-[var(--pull-h)] w-[30%] bg-[#FFE4E6]! font-sans text-[length:var(--fs-option)] font-black text-wrong disabled:opacity-50 ${KEYCAP} ${FOCUS_RING}`}
           aria-label="Clear"
         >
           C
         </button>
-        <PullButton side={side} type="submit" disabled={locked || !trimmed} className="flex-1" />
+        <LockButton side={side} type="submit" keyHint={keyHint ? "Enter" : undefined} disabled={disabled || !trimmed} className="flex-1" />
       </div>
     </form>
   );
 }
 
-function PullButton({
+function LockButton({
   side,
   disabled,
   onClick,
   type = "button",
   className = "",
   label,
+  keyHint,
 }: {
   side: Side;
   label?: string;
+  keyHint?: string;
   disabled: boolean;
   onClick?: () => void;
   type?: "button" | "submit";
@@ -296,17 +346,19 @@ function PullButton({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`relative flex h-[var(--pull-h)] shrink-0 items-center justify-center gap-[calc(var(--gap)*0.6)] rounded-[var(--r-key)] font-display text-[length:calc(var(--fs-option)*1.1)] font-black uppercase tracking-[0.06em] text-white transition-[transform,box-shadow,opacity] active:translate-y-[4px] active:shadow-none disabled:opacity-45 ${s.pull} ${FOCUS_RING} ${className}`}
+      className={`relative flex h-[var(--pull-h)] shrink-0 items-center justify-center gap-[calc(var(--gap)*0.6)] rounded-[var(--r-key)] font-display text-[length:calc(var(--fs-option)*1.05)] font-black uppercase tracking-[0.06em] text-white transition-[transform,box-shadow,opacity] active:translate-y-[4px] active:shadow-none disabled:opacity-45 ${s.pull} ${FOCUS_RING} ${className}`}
     >
       {label ?? (
         <>
-          Pull
+          Lock in
           <Zap className="size-[1em] fill-focus text-focus" aria-hidden="true" />
         </>
       )}
-      <span className="absolute right-[calc(var(--gap)*0.8)] hidden text-[length:var(--fs-key)] font-bold normal-case tracking-normal text-white/70 @3xl:inline">
-        {s.pullKey}
-      </span>
+      {keyHint && (
+        <span className="absolute right-[calc(var(--gap)*0.8)] hidden text-[length:var(--fs-key)] font-bold normal-case tracking-normal text-white/75 @3xl:inline">
+          {keyHint}
+        </span>
+      )}
     </button>
   );
 }

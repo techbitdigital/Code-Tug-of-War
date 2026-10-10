@@ -13,6 +13,10 @@ const memoryEntrySchema = z.object({
   name: z.string().min(1),
   value: z.string(),
   changed: z.boolean().optional(),
+  /** Which box group it lives in: "global", a call like "double(5)", or "loop". */
+  scope: z.string().min(1).optional(),
+  /** Declared but not usable yet (a `let`/`const` before its line runs: the TDZ). */
+  uninitialized: z.boolean().optional(),
 });
 
 const revealFrameSchema = z.object({
@@ -21,6 +25,8 @@ const revealFrameSchema = z.object({
   memory: z.array(memoryEntrySchema).optional(),
   stack: z.array(z.string()).optional(), // top first
   output: z.string().optional(),
+  /** What the engine works out on this step, one stage per item: ["score + 2", "0 + 2", "2"]. */
+  eval: z.array(z.string().min(1)).min(1).optional(),
   say: z.string().min(1),
 });
 
@@ -35,6 +41,8 @@ const answerSchema = z.discriminatedUnion("type", [
     type: z.literal("mcq"),
     options: z.array(z.string().min(1)).min(2).max(4),
     correctIndex: z.number().int().min(0),
+    /** "Why not?" for each option, same order as options. The correct one may be "". */
+    why: z.array(z.string()).optional(),
   }),
   z.object({
     type: z.literal("text"),
@@ -50,7 +58,7 @@ const roundSchema = z
     prompt: z.string().min(1),
     code: codeSchema.optional(),
     answer: answerSchema,
-    reveal: z.array(revealFrameSchema).min(1).max(6),
+    reveal: z.array(revealFrameSchema).min(1).max(12),
     timeLimitSec: z.number().int().positive().optional(),
   })
   .superRefine((round, ctx) => {
@@ -64,6 +72,21 @@ const roundSchema = z
         code: "custom",
         path: ["answer", "correctIndex"],
         message: `correctIndex ${round.answer.correctIndex} is out of range for ${round.answer.options.length} options`,
+      });
+    }
+
+    if (round.answer.type === "mcq" && round.answer.why) {
+      if (round.answer.why.length !== round.answer.options.length) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["answer", "why"],
+          message: `why has ${round.answer.why.length} entries but there are ${round.answer.options.length} options`,
+        });
+      }
+      round.answer.why.forEach((text, i) => {
+        if (round.answer.type === "mcq" && i !== round.answer.correctIndex && !text.trim()) {
+          ctx.addIssue({ code: "custom", path: ["answer", "why", i], message: "every wrong option needs a why" });
+        }
       });
     }
 

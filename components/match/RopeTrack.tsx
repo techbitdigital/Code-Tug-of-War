@@ -18,8 +18,8 @@ const H = 256;
 const MID = W / 2;
 const ROPE_Y = 128;
 const GROUND_Y = 230;
-const WIN_DX = 64; // the flag travels this far to win; the losers end up over the line
-const HEAVE_MS = 650; // how long a pull reaction lasts before the bots settle
+const WIN_DX = 80; // the flag travels this far to win; the losers end up over the line
+const HEAVE_MS = 1100; // how long a pull reaction lasts before the bots settle
 
 export default function RopeTrack({ ropePosition, pullsToWin }: RopeTrackProps) {
   const reduced = useReducedMotion() ?? false;
@@ -31,12 +31,14 @@ export default function RopeTrack({ ropePosition, pullsToWin }: RopeTrackProps) 
 
   // Which team just pulled. Set when ropePosition changes, cleared after HEAVE_MS.
   const [puller, setPuller] = useState<Side | null>(null);
+  const [pullId, setPullId] = useState(0);
   const prev = useRef(ropePosition);
   useEffect(() => {
     const delta = ropePosition - prev.current;
     prev.current = ropePosition;
     if (delta === 0) return;
     setPuller(delta < 0 ? "a" : "b");
+    setPullId((n) => n + 1);
     const t = setTimeout(() => setPuller(null), HEAVE_MS);
     return () => clearTimeout(t);
   }, [ropePosition]);
@@ -90,10 +92,17 @@ export default function RopeTrack({ ropePosition, pullsToWin }: RopeTrackProps) 
         <line x1={MID} y1="20" x2={MID} y2={GROUND_Y + 4} stroke="var(--focus)" strokeWidth="5" strokeLinecap="round" />
 
         {/* everything that moves with the rope */}
+        {/* A pull is a yank: past the new spot, then back. Other moves just spring. */}
         <motion.g
           initial={false}
-          animate={{ x: shift }}
-          transition={reduced ? { duration: 0 } : motionTokens.pull}
+          animate={{ x: puller && !reduced ? [null, shift + (puller === "a" ? -1 : 1) * 18, shift] : shift }}
+          transition={
+            reduced
+              ? { duration: 0 }
+              : puller
+                ? { duration: 0.9, times: [0, 0.45, 1], ease: ["easeOut", "easeInOut"] }
+                : motionTokens.pull
+          }
         >
           {/* rope with loose tails behind the back pullers */}
           <path
@@ -122,6 +131,29 @@ export default function RopeTrack({ ropePosition, pullsToWin }: RopeTrackProps) 
           </motion.g>
           <circle cx={MID} cy={ROPE_Y} r="6" fill="var(--accent)" stroke="#fff" strokeWidth="2.5" />
         </motion.g>
+
+        {/* "PULL!" burst over the pulling side */}
+        {puller && !reduced && (
+          <motion.text
+            key={pullId}
+            x={puller === "a" ? W * 0.27 : W * 0.73}
+            y={52}
+            textAnchor="middle"
+            initial={{ opacity: 0, scale: 0.4, y: 12 }}
+            animate={{ opacity: [0, 1, 1, 0], scale: [0.4, 1.15, 1, 1], y: [12, 0, -4, -14] }}
+            transition={{ duration: HEAVE_MS / 1000, times: [0, 0.25, 0.7, 1] }}
+            style={{ transformBox: "fill-box", originX: "50%", originY: "50%" }}
+            className="font-display"
+            fontSize="44"
+            fontWeight="900"
+            fill={puller === "a" ? "var(--team-a)" : "var(--team-b)"}
+            stroke="#fff"
+            strokeWidth="6"
+            paintOrder="stroke"
+          >
+            PULL!
+          </motion.text>
+        )}
       </svg>
     </div>
   );

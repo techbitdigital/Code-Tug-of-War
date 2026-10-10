@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Box, Code2, Cpu, Terminal } from "lucide-react";
 import CodeCard from "@/components/match/CodeCard";
-import { buildRevealSteps, type RevealStep } from "@/lib/reveal";
+import { buildRevealSteps, groupByScope, type RevealStep } from "@/lib/reveal";
 import { motionTokens } from "@/lib/motion";
 import type { CodeBlock, RevealFrame } from "@/lib/types";
 
@@ -28,7 +28,17 @@ interface RevealProps {
   onFinish?: () => void;
   /** Colour of the finish button. */
   tone?: "accent" | "a" | "b";
+  /** An extra last step after the frames (in a match: what each team said, and why not). */
+  epilogue?: { title: string; content: ReactNode };
 }
+
+// Memory and Runtime hold the most; Code and Output are one line each.
+const LAYER_FLEX: Record<Layer, string> = {
+  code: "flex-[0.75]",
+  runtime: "flex-[1.05]",
+  memory: "flex-[1.55]",
+  output: "flex-[0.85]",
+};
 
 const TONE = {
   accent: "bg-gradient-to-b from-[#8B5CF6] to-accent shadow-[0_5px_0_#5B21B6]",
@@ -43,12 +53,23 @@ const FOCUS_RING = "focus-visible:outline-[3px] focus-visible:outline-offset-2 f
  * Standalone on purpose: it only needs frames (and optionally the code), so it can
  * also run outside a match later (trace-first mode).
  */
-export default function Reveal({ frames, code, header, finishLabel = "Done", onFinish, tone = "accent" }: RevealProps) {
+export default function Reveal({
+  frames,
+  code,
+  header,
+  finishLabel = "Done",
+  onFinish,
+  tone = "accent",
+  epilogue,
+}: RevealProps) {
   const steps = useMemo(() => buildRevealSteps(frames), [frames]);
+  const total = steps.length + (epilogue ? 1 : 0);
   const [index, setIndex] = useState(0);
   const reduced = useReducedMotion() ?? false;
-  const step = steps[index];
-  const last = index === steps.length - 1;
+  const onEpilogue = epilogue !== undefined && index === steps.length;
+  // The epilogue keeps showing the final state of the layers.
+  const step = steps[Math.min(index, steps.length - 1)];
+  const last = index === total - 1;
 
   // On phones the reveal replaces the match in the page, so start it at the top.
   useEffect(() => {
@@ -63,7 +84,7 @@ export default function Reveal({ frames, code, header, finishLabel = "Done", onF
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        setIndex((i) => Math.min(steps.length - 1, i + 1));
+        setIndex((i) => Math.min(total - 1, i + 1));
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         setIndex((i) => Math.max(0, i - 1));
@@ -71,7 +92,7 @@ export default function Reveal({ frames, code, header, finishLabel = "Done", onF
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [steps.length]);
+  }, [total]);
 
   const codeFit = code ? Math.min(1, 560 / (28 * (0.6 * Math.max(...code.lines.map((l) => l.length)) + 2.2))) : 1;
 
@@ -85,13 +106,20 @@ export default function Reveal({ frames, code, header, finishLabel = "Done", onF
     >
       {header}
 
-      <div className="grid min-h-0 flex-1 gap-[var(--pad)] p-[var(--pad)] @3xl:grid-cols-[1.08fr_1fr]">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] gap-[var(--pad)] p-[var(--pad)] @3xl:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
         {/* Left: the code with the current line, and the bot explaining it */}
         <div className="flex min-h-0 flex-col gap-[var(--pad)]">
           {code && (
             <CodeCard code={{ ...code, focusLine: step.line ?? undefined }} fitW={codeFit} fitH={1} />
           )}
-          <Narration step={step} index={index} total={steps.length} reduced={reduced} />
+          {onEpilogue ? (
+            <div className="flex min-h-0 flex-1 flex-col gap-[var(--gap)] overflow-y-auto rounded-[var(--r-key)] bg-arena p-[var(--pad)]">
+              <p className="text-[length:var(--fs-ui)] font-extrabold uppercase tracking-[0.1em] text-accent">{epilogue.title}</p>
+              {epilogue.content}
+            </div>
+          ) : (
+            <Narration step={step} index={index} total={steps.length} reduced={reduced} />
+          )}
         </div>
 
         {/* Right: the layers beneath the line */}
@@ -108,8 +136,12 @@ export default function Reveal({ frames, code, header, finishLabel = "Done", onF
           <ArrowLeft className="size-[1.1em]" strokeWidth={3} aria-hidden="true" /> Back
         </button>
 
-        <div className="flex items-center gap-[calc(var(--gap)*0.6)]" aria-label={`Step ${index + 1} of ${steps.length}`}>
-          {steps.map((_, i) => (
+        {/* Phones: a short counter; dots don't fit once a reveal has many steps. */}
+        <span className="font-display text-[length:var(--fs-ui)] font-black text-ink-muted @3xl:hidden">
+          {index + 1} / {total}
+        </span>
+        <div className="hidden min-w-0 items-center gap-[calc(var(--gap)*0.6)] @3xl:flex" aria-label={`Step ${index + 1} of ${total}`}>
+          {Array.from({ length: total }, (_, i) => (
             <button
               key={i}
               type="button"
@@ -131,7 +163,7 @@ export default function Reveal({ frames, code, header, finishLabel = "Done", onF
             last ? TONE[tone] : TONE.accent
           } ${FOCUS_RING}`}
         >
-          {last ? finishLabel : "Next step"} <ArrowRight className="size-[1.1em]" strokeWidth={3} aria-hidden="true" />
+          {last ? finishLabel : index === steps.length - 1 && epilogue ? epilogue.title : "Next step"} <ArrowRight className="size-[1.1em]" strokeWidth={3} aria-hidden="true" />
         </button>
       </footer>
     </motion.section>
@@ -148,19 +180,17 @@ function Narration({ step, index, total, reduced }: { step: RevealStep; index: n
         <p className="mb-1 text-[length:var(--fs-key)] font-extrabold uppercase tracking-[0.1em] text-accent @3xl:text-[length:var(--fs-ui)]">
           Step {index + 1} of {total}
         </p>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.p
-            key={index}
-            aria-live="polite"
-            initial={reduced ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduced ? undefined : { opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="text-[length:calc(var(--fs-option)*1.05)] font-bold leading-snug text-ink"
-          >
-            {step.frame.say}
-          </motion.p>
-        </AnimatePresence>
+        {/* Swaps instantly with the panels (a short fade, no exit delay) so text and state never disagree. */}
+        <motion.p
+          key={index}
+          aria-live="polite"
+          initial={reduced ? false : { opacity: 0.35 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+          className="text-[length:calc(var(--fs-option)*1.05)] font-bold leading-snug text-ink"
+        >
+          {step.frame.say}
+        </motion.p>
       </div>
     </div>
   );
@@ -189,7 +219,7 @@ function LayerLadder({ step, code, reduced }: { step: RevealStep; code?: CodeBlo
         const active = i === activeIdx;
         const passed = i < activeIdx;
         return (
-          <li key={id} className={`relative flex gap-[var(--gap)] ${id === "memory" ? "flex-[1.4]" : "flex-1"} min-h-0`}>
+          <li key={id} className={`relative flex min-h-0 gap-[var(--gap)] ${LAYER_FLEX[id]}`}>
             <span
               className={`relative z-10 flex size-[var(--chip)] shrink-0 items-center justify-center rounded-full transition-colors ${
                 active ? "bg-accent text-white shadow-[0_0_0_5px_rgba(124,58,237,0.18)]" : passed ? "bg-accent/70 text-white" : "bg-surface text-ink-muted ring-2 ring-line"
@@ -224,78 +254,120 @@ function LayerLadder({ step, code, reduced }: { step: RevealStep; code?: CodeBlo
 }
 
 function CodeLayer({ step, code }: { step: RevealStep; code?: CodeBlock }) {
-  const text = code && step.line !== null ? code.lines[step.line]?.trim() : null;
-  return text ? (
+  if (step.line === null) {
+    return <p className="text-[length:var(--fs-ui)] font-semibold text-ink-muted">Before running: the engine reads the whole program</p>;
+  }
+  const text = code?.lines[step.line]?.trim();
+  return (
     <p className="truncate font-mono text-[length:var(--fs-ui)] font-semibold text-ink">
-      <span className="mr-2 text-ink-muted">line {step.line! + 1}</span>
+      <span className="mr-2 text-ink-muted">line {step.line + 1}</span>
       {text}
     </p>
-  ) : (
-    <p className="text-[length:var(--fs-ui)] font-semibold text-ink-muted">–</p>
   );
 }
 
+/** What the engine works out (the eval chain), and the call stack when there is one. */
 function RuntimeLayer({ step, reduced }: { step: RevealStep; reduced: boolean }) {
-  if (step.stack.length === 0) {
-    return (
-      <p className="text-[length:var(--fs-ui)] font-semibold text-ink-muted">
-        {step.line !== null ? `Running line ${step.line + 1}` : "Waiting"}
-      </p>
-    );
+  const hasStack = step.stack.length > 0;
+  if (step.eval.length === 0 && !hasStack) {
+    return <p className="text-[length:var(--fs-ui)] font-semibold text-ink-muted">Nothing to work out on this step</p>;
   }
   return (
-    <div className="flex flex-wrap items-center gap-[calc(var(--gap)*0.5)]">
-      <span className="text-[length:var(--fs-key)] font-bold text-ink-muted">call stack, top first:</span>
-      <AnimatePresence initial={false} mode="popLayout">
-        {step.stack.map((frame, i) => (
-          <motion.span
-            key={`${frame}-${step.stack.length - i}`}
-            layout={!reduced}
-            initial={reduced ? false : { opacity: 0, y: -10, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduced ? undefined : { opacity: 0, y: -10, scale: 0.9 }}
-            transition={motionTokens.snap}
-            className={`rounded-[calc(var(--r-key)*0.6)] px-2 py-0.5 font-mono text-[length:var(--fs-ui)] font-bold ${
-              i === 0 ? "bg-accent text-white" : "bg-line text-ink"
-            }`}
-          >
-            {frame}
-          </motion.span>
-        ))}
-      </AnimatePresence>
+    <div className="flex flex-wrap items-center gap-x-[var(--gap)] gap-y-[calc(var(--gap)*0.4)]">
+      {step.eval.length > 0 && (
+        <div className="flex flex-wrap items-center gap-[calc(var(--gap)*0.4)] font-mono text-[length:var(--fs-ui)] font-bold">
+          {step.eval.map((part, i) => {
+            const final = i === step.eval.length - 1;
+            return (
+              <motion.span
+                key={`${part}-${i}`}
+                initial={reduced ? false : { opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: reduced ? 0 : i * 0.12, duration: 0.15 }}
+                className="flex items-center gap-[calc(var(--gap)*0.4)]"
+              >
+                {i > 0 && <span className="text-ink-muted">→</span>}
+                <span className={`rounded-[calc(var(--r-key)*0.5)] px-1.5 py-0.5 ${final ? "bg-accent text-white" : "bg-surface text-ink ring-1 ring-line"}`}>
+                  {part}
+                </span>
+              </motion.span>
+            );
+          })}
+        </div>
+      )}
+      {hasStack && (
+        <div className="flex flex-wrap items-center gap-[calc(var(--gap)*0.5)]">
+          <span className="text-[length:var(--fs-key)] font-bold text-ink-muted">stack:</span>
+          <AnimatePresence initial={false} mode="popLayout">
+            {step.stack.map((frame, i) => (
+              <motion.span
+                key={`${frame}-${step.stack.length - i}`}
+                layout={!reduced}
+                initial={reduced ? false : { opacity: 0, y: -10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={reduced ? undefined : { opacity: 0, y: -10, scale: 0.9 }}
+                transition={motionTokens.snap}
+                className={`rounded-[calc(var(--r-key)*0.6)] px-2 py-0.5 font-mono text-[length:var(--fs-key)] font-bold @3xl:text-[length:var(--fs-ui)] ${
+                  i === 0 ? "bg-ink text-white" : "bg-line text-ink"
+                }`}
+              >
+                {frame}
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
 
+/** Boxes grouped by where they live: global, a function's frame, or the loop. */
 function MemoryLayer({ step, reduced }: { step: RevealStep; reduced: boolean }) {
   if (step.memory.length === 0) {
     return <p className="text-[length:var(--fs-ui)] font-semibold text-ink-muted">Nothing stored yet</p>;
   }
+  const groups = groupByScope(step.memory);
   return (
-    <div className="flex flex-wrap gap-[var(--gap)]">
+    <div className="flex flex-wrap items-start gap-[var(--gap)]">
       <AnimatePresence initial={false} mode="popLayout">
-        {step.memory.map((box) => (
+        {groups.map((group) => (
           <motion.div
-            key={box.name}
+            key={group.scope}
             layout={!reduced}
-            initial={reduced ? false : { opacity: 0, scale: 0.6 }}
+            initial={reduced ? false : { opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={reduced ? undefined : { opacity: 0, scale: 0.6 }}
+            exit={reduced ? undefined : { opacity: 0, scale: 0.8 }}
             transition={motionTokens.snap}
-            className="flex flex-col items-center gap-0.5"
+            className={`flex flex-col gap-0.5 rounded-[calc(var(--r-key)*0.7)] px-[calc(var(--gap)*0.5)] pb-[calc(var(--gap)*0.4)] pt-0.5 ${
+              group.scope === "global" ? "bg-transparent" : "bg-accent/8 ring-1 ring-accent/30"
+            }`}
           >
-            <span className="font-mono text-[length:var(--fs-key)] font-bold text-ink-muted">{box.name}</span>
-            <motion.span
-              key={box.value}
-              initial={reduced || !box.changed ? false : { scale: 1.35, rotate: -4 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={motionTokens.pull}
-              className={`flex min-w-[calc(var(--chip)*1.6)] items-center justify-center rounded-[calc(var(--r-key)*0.7)] border-2 px-[var(--gap)] py-[calc(var(--gap)*0.4)] font-mono text-[length:var(--fs-option)] font-bold ${
-                box.changed ? "border-focus bg-[#FEF9C3] text-ink shadow-[0_3px_0_#EAB308]" : "border-line bg-surface text-ink shadow-key"
-              }`}
-            >
-              {box.value}
-            </motion.span>
+            {groups.length > 1 && (
+              <span className="font-mono text-[length:var(--fs-key)] font-bold text-ink-muted">{group.scope}</span>
+            )}
+            <div className="flex flex-wrap gap-[var(--gap)]">
+              {group.boxes.map((box) => (
+                <div key={box.name} className="flex flex-col items-center">
+                  <span className="font-mono text-[length:var(--fs-key)] font-bold text-ink-muted">{box.name}</span>
+                  <motion.span
+                    key={`${box.value}-${box.uninitialized}`}
+                    initial={reduced || !box.changed ? false : { scale: 1.3, rotate: -4 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={motionTokens.pull}
+                    title={box.uninitialized ? "Declared, but not ready to use yet" : undefined}
+                    className={`flex min-w-[calc(var(--chip)*1.4)] items-center justify-center whitespace-nowrap rounded-[calc(var(--r-key)*0.6)] border-2 px-[calc(var(--gap)*0.7)] py-[calc(var(--gap)*0.25)] font-mono font-bold ${
+                      box.uninitialized
+                        ? "border-dashed border-ink-muted/50 bg-[repeating-linear-gradient(135deg,transparent_0_6px,rgba(107,112,144,0.12)_6px_12px)] text-[length:var(--fs-key)] text-ink-muted"
+                        : box.changed
+                          ? "border-focus bg-[#FEF9C3] text-[length:calc(var(--fs-option)*0.85)] text-ink shadow-[0_3px_0_#EAB308]"
+                          : "border-line bg-surface text-[length:calc(var(--fs-option)*0.85)] text-ink shadow-key"
+                    }`}
+                  >
+                    {box.uninitialized ? "not ready" : box.value}
+                  </motion.span>
+                </div>
+              ))}
+            </div>
           </motion.div>
         ))}
       </AnimatePresence>

@@ -8,10 +8,10 @@ import MatchScreen from "./MatchScreen";
 // Dev page: a real, engine-driven match plus a panel to change the setup and play host.
 // The proper host flow (pick a pack, name teams, choose a mode) arrives in Step 6.
 export default function MatchLab({ rounds }: { rounds: Round[] }) {
-  const [pullsToWin, setPullsToWin] = useState<MatchConfig["pullsToWin"]>(3);
+  const [pullsToWin, setPullsToWin] = useState<MatchConfig["pullsToWin"]>(DEFAULT_CONFIG.pullsToWin);
   const [mode, setMode] = useState<MatchConfig["mode"]>("group");
   const [timeLimit, setTimeLimit] = useState(30);
-  const [lockout, setLockout] = useState(3);
+  const [countdown, setCountdown] = useState(true);
   const [typed, setTyped] = useState(false);
   const [seed, setSeed] = useState(1);
 
@@ -32,11 +32,11 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
     mode,
     teamNames: mode === "solo" ? { a: "You", b: "Robot" } : { a: "Cohort A", b: "Cohort B" },
     defaultTimeLimitSec: timeLimit,
-    lockoutMs: lockout * 1000,
+    countdownMs: countdown ? 3000 : 0,
     seed,
   };
   // Changing the setup starts a fresh match.
-  const key = JSON.stringify({ pullsToWin, mode, timeLimit, lockout, typed, seed });
+  const key = JSON.stringify({ pullsToWin, mode, timeLimit, countdown, typed, seed });
 
   return (
     <MatchScreen key={key} config={config}>
@@ -47,8 +47,8 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
           </summary>
           <div className="flex flex-col gap-2 border-t border-line p-3">
             <div className="grid grid-cols-3 gap-2">
-              <button type="button" className="rounded-lg border border-line px-2 py-1 font-bold" onClick={actions.skip}>
-                Skip
+              <button type="button" className="rounded-lg border border-line px-2 py-1 font-bold" onClick={actions.close}>
+                Reveal now
               </button>
               <button
                 type="button"
@@ -86,9 +86,9 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
               Seconds per question
               <input type="number" min={5} max={120} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value) || 30)} className="w-16 rounded border border-line p-1" />
             </label>
-            <label className="flex items-center justify-between gap-2">
-              Wrong-answer freeze (s)
-              <input type="number" min={0} max={10} value={lockout} onChange={(e) => setLockout(Number(e.target.value))} className="w-16 rounded border border-line p-1" />
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={countdown} onChange={(e) => setCountdown(e.target.checked)} />
+              3-2-1 countdown
             </label>
             <label className="flex items-center justify-between gap-2">
               Robot seed
@@ -100,7 +100,7 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
             </label>
             <p className="text-ink-muted">
               Rope {state.rope} · round {state.roundIndex + 1}/{state.config.rounds.length}
-              {state.robot ? ` · robot answers at +${Math.round((state.robot.at - state.questionStartedAt) / 1000)}s (${state.robot.correct ? "right" : "wrong"})` : ""}
+              {state.robot ? ` · robot locks in at +${Math.round((state.robot.at - state.questionStartedAt) / 1000)}s (${state.robot.correct ? "right" : "wrong"})` : ""}
             </p>
           </div>
         </details>

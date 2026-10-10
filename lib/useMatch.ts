@@ -5,25 +5,29 @@ import { createMatch, currentRound, matchReducer, timeLimitMs, type MatchConfig,
 
 const TICK_MS = 100;
 
-// Keyboard map for two teams sharing one laptop: number keys choose, Space / Enter pull.
-const KEYS: Record<Side, { pick: string[]; pull: string }> = {
-  a: { pick: ["1", "2", "3", "4"], pull: " " },
-  b: { pick: ["7", "8", "9", "0"], pull: "Enter" },
+// Keyboard map for two teams sharing one laptop: letter keys choose, Space / Enter lock in.
+// Team A sits on the left of the keyboard, Team B on the right.
+export const KEYS: Record<Side, { pick: string[]; lock: string; lockLabel: string }> = {
+  a: { pick: ["q", "w", "e", "r"], lock: " ", lockLabel: "Space" },
+  b: { pick: ["u", "i", "o", "p"], lock: "Enter", lockLabel: "Enter" },
 };
+const SOLO_EXTRA_PICKS = ["1", "2", "3", "4"];
 
 /** React glue for the engine: owns the clock, the ticker and the keyboard. */
 export function useMatch(config: MatchConfig) {
   const [state, dispatch] = useReducer(matchReducer, config, createMatch);
   const [now, setNow] = useState(() => Date.now());
 
-  const running = state.phase === "question" && state.pausedAt === null;
+  const running = (state.phase === "question" || state.phase === "countdown") && state.pausedAt === null;
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => {
+    const tick = () => {
       const t = Date.now();
       setNow(t);
       dispatch({ type: "TICK", now: t });
-    }, TICK_MS);
+    };
+    tick();
+    const id = setInterval(tick, TICK_MS);
     return () => clearInterval(id);
   }, [running]);
 
@@ -33,7 +37,7 @@ export function useMatch(config: MatchConfig) {
       pick: (side: Side, index: number) => dispatch({ type: "PICK", side, index }),
       answer: (side: Side, value: number | string) => dispatch({ type: "ANSWER", side, value, now: Date.now() }),
       next: () => dispatch({ type: "NEXT", now: Date.now() }),
-      skip: () => dispatch({ type: "SKIP", now: Date.now() }),
+      close: () => dispatch({ type: "CLOSE", now: Date.now() }),
       pause: () => dispatch({ type: "PAUSE", now: Date.now() }),
       resume: () => dispatch({ type: "RESUME", now: Date.now() }),
       restart: () => dispatch({ type: "RESTART" }),
@@ -48,25 +52,31 @@ export function useMatch(config: MatchConfig) {
     (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
       const s = stateRef.current;
       if (s.phase !== "question" || s.pausedAt !== null) return;
       if (currentRound(s).answer.type !== "mcq") return;
 
-      const sides: Side[] = s.config.mode === "solo" ? ["a"] : ["a", "b"];
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      const solo = s.config.mode === "solo";
+      const sides: Side[] = solo ? ["a"] : ["a", "b"];
+
       for (const side of sides) {
-        const index = KEYS[side].pick.indexOf(event.key);
-        // Solo players may use either set of number keys.
-        const soloIndex = s.config.mode === "solo" && index < 0 ? KEYS.b.pick.indexOf(event.key) : index;
-        if (soloIndex >= 0) {
-          actions.pick(side, soloIndex);
-          return;
+        // Solo players may use any of the pick keys and either lock key.
+        const picks = solo ? [KEYS.a.pick, KEYS.b.pick, SOLO_EXTRA_PICKS] : [KEYS[side].pick];
+        for (const set of picks) {
+          const index = set.indexOf(key);
+          if (index >= 0) {
+            actions.pick(side, index);
+            return;
+          }
         }
-        const isPull = event.key === KEYS[side].pull || (s.config.mode === "solo" && event.key === KEYS.b.pull);
-        if (isPull) {
+        const isLock = key === KEYS[side].lock || (solo && key === KEYS.b.lock);
+        if (isLock) {
           // Stop Space/Enter also "clicking" whatever button has focus.
           event.preventDefault();
           const picked = s.teams[side].picked;
-          if (picked !== null) actions.answer(side, picked);
+          if (picked !== null && !s.teams[side].locked) actions.answer(side, picked);
           return;
         }
       }
@@ -80,9 +90,13 @@ export function useMatch(config: MatchConfig) {
 
   const clock = state.pausedAt ?? now;
   const timerFraction =
-    state.phase === "question" ? Math.max(0, Math.min(1, (state.deadline - clock) / timeLimitMs(state))) : state.phase === "ready" ? 1 : 0;
+    state.phase === "question"
+      ? Math.max(0, Math.min(1, (state.deadline - clock) / timeLimitMs(state)))
+      : state.phase === "ready" || state.phase === "countdown"
+        ? 1
+        : 0;
   const secondsLeft = state.phase === "question" ? Math.max(0, Math.ceil((state.deadline - clock) / 1000)) : 0;
-  const coolingDown = (side: Side) => state.phase === "question" && clock < state.teams[side].lockedUntil;
+  const countdownLeft = state.phase === "countdown" ? Math.max(1, Math.ceil((state.countdownEndsAt - clock) / 1000)) : 0;
 
-  return { state, actions, round: currentRound(state), timerFraction, secondsLeft, coolingDown };
+  return { state, actions, round: currentRound(state), timerFraction, secondsLeft, countdownLeft };
 }

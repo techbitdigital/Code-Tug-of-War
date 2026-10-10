@@ -7,7 +7,7 @@ describe("buildRevealSteps", () => {
       { line: 0, layer: "memory", memory: [{ name: "x", value: "2", changed: true }], stack: ["global"], say: "a" },
       { line: 2, layer: "output", output: "2", say: "b" },
     ]);
-    expect(steps[1].memory).toEqual([{ name: "x", value: "2", changed: false }]);
+    expect(steps[1].memory).toEqual([{ name: "x", value: "2", changed: false, scope: "global", uninitialized: false }]);
     expect(steps[1].stack).toEqual(["global"]);
   });
 
