@@ -59,6 +59,21 @@ export default function HomePage() {
             </article>
           </div>
         </section>
+
+        <footer className="flex flex-col items-center gap-1 border-t border-line pt-6 text-center text-sm font-semibold text-ink-muted">
+          <p>
+            Powered by{" "}
+            <a
+              href="https://www.techbitdigital.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-extrabold text-ink underline decoration-accent/40 decoration-2 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent focus-visible:rounded focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              Techbit Digital
+            </a>
+          </p>
+          <p className="text-xs">© {new Date().getFullYear()} Code Tug of War</p>
+        </footer>
       </div>
     </main>
   );
