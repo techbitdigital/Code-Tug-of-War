@@ -27,6 +27,8 @@ const revealFrameSchema = z.object({
   output: z.string().optional(),
   /** What the engine works out on this step, one stage per item: ["score + 2", "0 + 2", "2"]. */
   eval: z.array(z.string().min(1)).min(1).optional(),
+  /** Steps that repeat (e.g. "loop") share a group, so the reveal can offer "Skip to end of loop". */
+  group: z.string().min(1).optional(),
   say: z.string().min(1),
 });
 

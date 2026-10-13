@@ -12,6 +12,7 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
   const [mode, setMode] = useState<MatchConfig["mode"]>("group");
   const [timeLimit, setTimeLimit] = useState(30);
   const [countdown, setCountdown] = useState(true);
+  const [autoReveal, setAutoReveal] = useState(false);
   const [typed, setTyped] = useState(false);
   const [seed, setSeed] = useState(1);
 
@@ -39,7 +40,7 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
   const key = JSON.stringify({ pullsToWin, mode, timeLimit, countdown, typed, seed });
 
   return (
-    <MatchScreen key={key} config={config}>
+    <MatchScreen key={key} config={config} autoRevealMs={autoReveal ? 2600 : undefined}>
       {({ state, actions }) => (
         <details className="fixed bottom-2 left-1/2 z-50 w-72 -translate-x-1/2 rounded-2xl bg-surface text-sm shadow-panel">
           <summary className="cursor-pointer select-none px-3 py-1.5 font-semibold">
@@ -89,6 +90,10 @@ export default function MatchLab({ rounds }: { rounds: Round[] }) {
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={countdown} onChange={(e) => setCountdown(e.target.checked)} />
               3-2-1 countdown
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={autoReveal} onChange={(e) => setAutoReveal(e.target.checked)} />
+              Open the reveal by itself after 2.6s
             </label>
             <label className="flex items-center justify-between gap-2">
               Robot seed

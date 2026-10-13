@@ -40,7 +40,8 @@ export default function QuestionCard({ round, concealed = false }: QuestionCardP
       </h1>
       {round.code && (
         <div className="flex min-h-0 flex-1 flex-col justify-center">
-          <CodeCard code={round.code} fitW={fit.codeW} fitH={fit.codeH} />
+          {/* No line highlight while teams answer: it would point at the answer. The reveal highlights lines. */}
+          <CodeCard code={{ ...round.code, focusLine: undefined }} fitW={fit.codeW} fitH={fit.codeH} />
         </div>
       )}
     </section>

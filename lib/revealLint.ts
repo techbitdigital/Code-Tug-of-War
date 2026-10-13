@@ -15,6 +15,8 @@ export interface LintIssue {
 const CLAIM =
   /\b([A-Za-z_$][\w$]*)\s*(?:=|becomes|is now|holds|is)\s*(-?\d+(?:\.\d+)?|'[^']*'|"[^"]*"|true|false)(?!\w|\.\d|\s*[-+*/%<>=])/g;
 
+const COMPARISON = /(<=|>=|===|!==|==|!=|<|>)/;
+
 export const LIMITS = { codeLines: 5, promptChars: 60, optionChars: 18 };
 
 export function lintRound(round: Round): LintIssue[] {
@@ -50,13 +52,21 @@ export function lintRound(round: Round): LintIssue[] {
       }
     }
 
-    // 3. A runtime step should show what the engine works out.
+    // 3. A comparison must end in its result, so learners see the true/false that decides things.
+    if (step.eval.some((part) => COMPARISON.test(part))) {
+      const last = step.eval[step.eval.length - 1];
+      if (last !== "true" && last !== "false") {
+        issues.push({ level: "error", where, message: `eval compares values but doesn't end in true or false ("${last}")` });
+      }
+    }
+
+    // 4. A runtime step should show what the engine works out.
     if (step.frame.layer === "runtime" && step.eval.length === 0 && !step.frame.stack) {
       issues.push({ level: "warning", where, message: "runtime step has no eval or stack, so the Runtime panel would be empty" });
     }
   });
 
-  // 4. Content that won't fit the stage comfortably.
+  // 5. Content that won't fit the stage comfortably.
   if (round.code && round.code.lines.length > LIMITS.codeLines) {
     issues.push({ level: "warning", where: round.id, message: `${round.code.lines.length} code lines (keep to ${LIMITS.codeLines} or fewer)` });
   }

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Box, Code2, Cpu, Terminal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Box, Code2, Cpu, FastForward, Terminal, X } from "lucide-react";
 import CodeCard from "@/components/match/CodeCard";
 import { buildRevealSteps, groupByScope, type RevealStep } from "@/lib/reveal";
 import { motionTokens } from "@/lib/motion";
@@ -30,15 +30,9 @@ interface RevealProps {
   tone?: "accent" | "a" | "b";
   /** An extra last step after the frames (in a match: what each team said, and why not). */
   epilogue?: { title: string; content: ReactNode };
+  /** Shows an X (and closes on Escape), e.g. when replaying from the results. */
+  onClose?: () => void;
 }
-
-// Memory and Runtime hold the most; Code and Output are one line each.
-const LAYER_FLEX: Record<Layer, string> = {
-  code: "flex-[0.75]",
-  runtime: "flex-[1.05]",
-  memory: "flex-[1.55]",
-  output: "flex-[0.85]",
-};
 
 const TONE = {
   accent: "bg-gradient-to-b from-[#8B5CF6] to-accent shadow-[0_5px_0_#5B21B6]",
@@ -61,6 +55,7 @@ export default function Reveal({
   onFinish,
   tone = "accent",
   epilogue,
+  onClose,
 }: RevealProps) {
   const steps = useMemo(() => buildRevealSteps(frames), [frames]);
   const total = steps.length + (epilogue ? 1 : 0);
@@ -79,10 +74,18 @@ export default function Reveal({
   const next = () => (last ? onFinish?.() : setIndex((i) => i + 1));
   const back = () => setIndex((i) => Math.max(0, i - 1));
 
+  // Repeating steps (a loop) can be skipped: jump to the first step after the group.
+  const group = onEpilogue ? undefined : step.frame.group;
+  const groupEnd = group ? steps.findIndex((s, i) => i > index && s.frame.group !== group) : -1;
+  const skipTo = groupEnd > index + 1 ? groupEnd : -1;
+
   // Arrow keys step through; Enter/Space are left to the focused button.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") {
+      if (e.key === "Escape" && onClose) {
+        e.preventDefault();
+        onClose();
+      } else if (e.key === "ArrowRight") {
         e.preventDefault();
         setIndex((i) => Math.min(total - 1, i + 1));
       } else if (e.key === "ArrowLeft") {
@@ -92,7 +95,7 @@ export default function Reveal({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [total]);
+  }, [total, onClose]);
 
   const codeFit = code ? Math.min(1, 560 / (28 * (0.6 * Math.max(...code.lines.map((l) => l.length)) + 2.2))) : 1;
 
@@ -102,9 +105,20 @@ export default function Reveal({
       initial={reduced ? false : { opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={motionTokens.settle}
-      className="flex min-h-full flex-col overflow-hidden rounded-[var(--r-card)] bg-surface shadow-panel @3xl:h-full"
+      className="relative flex min-h-full flex-col overflow-hidden rounded-[var(--r-card)] bg-surface shadow-panel @3xl:h-full"
     >
       {header}
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close (Esc)"
+          title="Close (Esc)"
+          className={`absolute right-[calc(var(--gap)*0.8)] top-[calc(var(--gap)*0.8)] z-10 flex size-[calc(var(--chip)*1.1)] items-center justify-center rounded-full bg-white text-ink shadow-panel transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+        >
+          <X className="size-[55%]" strokeWidth={3} aria-hidden="true" />
+        </button>
+      )}
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] gap-[var(--pad)] p-[var(--pad)] @3xl:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
         {/* Left: the code with the current line, and the bot explaining it */}
@@ -118,7 +132,13 @@ export default function Reveal({
               {epilogue.content}
             </div>
           ) : (
-            <Narration step={step} index={index} total={steps.length} reduced={reduced} />
+            <Narration
+              step={step}
+              index={index}
+              total={steps.length}
+              reduced={reduced}
+              skip={skipTo > 0 ? { label: `Skip to end of ${group}`, onClick: () => setIndex(skipTo) } : undefined}
+            />
           )}
         </div>
 
@@ -133,14 +153,12 @@ export default function Reveal({
           disabled={index === 0}
           className={`inline-flex h-[calc(var(--pull-h)*0.85)] items-center gap-2 whitespace-nowrap rounded-[var(--r-key)] border-2 border-line bg-surface px-[var(--pad)] font-display text-[length:var(--fs-ui)] font-black text-ink shadow-key transition-[transform,box-shadow] active:translate-y-[3px] active:shadow-none disabled:opacity-40 ${FOCUS_RING}`}
         >
-          <ArrowLeft className="size-[1.1em]" strokeWidth={3} aria-hidden="true" /> Back
+          <ArrowLeft className="size-[1.1em]" strokeWidth={3} aria-hidden="true" />
+          <span className="sr-only @3xl:not-sr-only">Back</span>
         </button>
 
-        {/* Phones: a short counter; dots don't fit once a reveal has many steps. */}
-        <span className="font-display text-[length:var(--fs-ui)] font-black text-ink-muted @3xl:hidden">
-          {index + 1} / {total}
-        </span>
-        <div className="hidden min-w-0 items-center gap-[calc(var(--gap)*0.6)] @3xl:flex" aria-label={`Step ${index + 1} of ${total}`}>
+        {/* Click any dot to jump straight to that step. */}
+        <div className="flex min-w-0 flex-wrap items-center justify-center gap-[5px] @3xl:gap-[calc(var(--gap)*0.6)]" aria-label={`Step ${index + 1} of ${total}`}>
           {Array.from({ length: total }, (_, i) => (
             <button
               key={i}
@@ -148,8 +166,11 @@ export default function Reveal({
               aria-label={`Go to step ${i + 1}`}
               aria-current={i === index ? "step" : undefined}
               onClick={() => setIndex(i)}
-              className={`h-[calc(var(--gap)*0.9)] rounded-full transition-all ${
-                i === index ? "w-[calc(var(--gap)*2.6)] bg-accent" : i < index ? "w-[calc(var(--gap)*0.9)] bg-accent/40" : "w-[calc(var(--gap)*0.9)] bg-line"
+              title={`Step ${i + 1}`}
+              className={`relative h-[10px] rounded-full transition-all before:absolute before:-inset-[6px] before:content-[''] @3xl:h-[calc(var(--gap)*0.9)] ${
+                i === index
+                  ? "w-[22px] bg-accent @3xl:w-[calc(var(--gap)*2.6)]"
+                  : `w-[10px] @3xl:w-[calc(var(--gap)*0.9)] ${i < index ? "bg-accent/40" : "bg-line"} hover:bg-accent/70`
               } ${FOCUS_RING}`}
             />
           ))}
@@ -170,7 +191,19 @@ export default function Reveal({
   );
 }
 
-function Narration({ step, index, total, reduced }: { step: RevealStep; index: number; total: number; reduced: boolean }) {
+function Narration({
+  step,
+  index,
+  total,
+  reduced,
+  skip,
+}: {
+  step: RevealStep;
+  index: number;
+  total: number;
+  reduced: boolean;
+  skip?: { label: string; onClick: () => void };
+}) {
   return (
     <div className="flex min-h-0 flex-1 items-start gap-[var(--gap)]">
       <BotAvatar />
@@ -191,6 +224,15 @@ function Narration({ step, index, total, reduced }: { step: RevealStep; index: n
         >
           {step.frame.say}
         </motion.p>
+        {skip && (
+          <button
+            type="button"
+            onClick={skip.onClick}
+            className={`mt-[var(--gap)] inline-flex items-center gap-1.5 self-start rounded-full border-2 border-accent/40 bg-surface px-3 py-1 text-[length:var(--fs-ui)] font-extrabold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+          >
+            <FastForward className="size-[1em]" aria-hidden="true" /> {skip.label}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -201,25 +243,20 @@ function LayerLadder({ step, code, reduced }: { step: RevealStep; code?: CodeBlo
 
   return (
     <ol className="relative flex min-h-0 flex-col gap-[calc(var(--gap)*0.8)]">
-      {/* The rail: fills down to the active layer, showing how deep this step goes. */}
-      <span
-        className="absolute bottom-[calc(var(--chip)*0.5)] left-[calc(var(--chip)*0.5-2px)] top-[calc(var(--chip)*0.5)] w-1 rounded-full bg-line"
-        aria-hidden="true"
-      />
-      <motion.span
-        className="absolute left-[calc(var(--chip)*0.5-2px)] top-[calc(var(--chip)*0.5)] w-1 origin-top rounded-full bg-accent"
-        style={{ height: "calc(100% - var(--chip))" }}
-        initial={false}
-        animate={{ scaleY: activeIdx / (LAYERS.length - 1) }}
-        transition={reduced ? { duration: 0 } : motionTokens.settle}
-        aria-hidden="true"
-      />
-
       {LAYERS.map(({ id, title, hint, Icon }, i) => {
         const active = i === activeIdx;
         const passed = i < activeIdx;
         return (
-          <li key={id} className={`relative flex min-h-0 gap-[var(--gap)] ${LAYER_FLEX[id]}`}>
+          <li key={id} className={`relative flex gap-[var(--gap)] ${id === "memory" ? "min-h-[7em] flex-1" : "shrink-0"}`}>
+            {/* The rail to the next layer: purple down to the layer this step reaches. */}
+            {i < LAYERS.length - 1 && (
+              <span
+                aria-hidden="true"
+                className={`absolute bottom-[calc(-1*(var(--gap)*0.8+var(--chip)*0.5))] left-[calc(var(--chip)*0.5-2px)] top-[calc(var(--chip)*0.5)] w-1 rounded-full transition-colors duration-300 ${
+                  i < activeIdx ? "bg-accent" : "bg-line"
+                }`}
+              />
+            )}
             <span
               className={`relative z-10 flex size-[var(--chip)] shrink-0 items-center justify-center rounded-full transition-colors ${
                 active ? "bg-accent text-white shadow-[0_0_0_5px_rgba(124,58,237,0.18)]" : passed ? "bg-accent/70 text-white" : "bg-surface text-ink-muted ring-2 ring-line"
@@ -239,7 +276,7 @@ function LayerLadder({ step, code, reduced }: { step: RevealStep; code?: CodeBlo
                 </span>
                 <span className="truncate text-[length:var(--fs-key)] font-bold text-ink-muted">{hint}</span>
               </div>
-              <div className="min-h-0 flex-1">
+              <div className={`min-h-0 flex-1 ${id === "memory" ? "overflow-y-auto" : ""}`}>
                 {id === "code" && <CodeLayer step={step} code={code} />}
                 {id === "runtime" && <RuntimeLayer step={step} reduced={reduced} />}
                 {id === "memory" && <MemoryLayer step={step} reduced={reduced} />}
@@ -287,7 +324,17 @@ function RuntimeLayer({ step, reduced }: { step: RevealStep; reduced: boolean })
                 className="flex items-center gap-[calc(var(--gap)*0.4)]"
               >
                 {i > 0 && <span className="text-ink-muted">→</span>}
-                <span className={`rounded-[calc(var(--r-key)*0.5)] px-1.5 py-0.5 ${final ? "bg-accent text-white" : "bg-surface text-ink ring-1 ring-line"}`}>
+                <span
+                  className={`rounded-[calc(var(--r-key)*0.5)] px-1.5 py-0.5 ${
+                    !final
+                      ? "bg-surface text-ink ring-1 ring-line"
+                      : part === "true"
+                        ? "bg-correct text-white"
+                        : part === "false"
+                          ? "bg-wrong text-white"
+                          : "bg-accent text-white"
+                  }`}
+                >
                   {part}
                 </span>
               </motion.span>

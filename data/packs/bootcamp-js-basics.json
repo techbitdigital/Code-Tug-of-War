@@ -245,7 +245,8 @@
               "changed": true
             }
           ],
-          "say": "Line 2: the loop makes its own box i = 0, then checks i < 3. It's true, so the body runs."
+          "say": "Line 2: the loop makes its own box i = 0, then checks i < 3. It's true, so the body runs.",
+          "group": "loop"
         },
         {
           "line": 2,
@@ -268,7 +269,8 @@
               "scope": "loop"
             }
           ],
-          "say": "Pass 1: the engine works out 0 + 2, so score becomes 2."
+          "say": "Pass 1: the engine works out 0 + 2, so score becomes 2.",
+          "group": "loop"
         },
         {
           "line": 1,
@@ -292,7 +294,8 @@
               "changed": true
             }
           ],
-          "say": "Back to line 2: i++ makes i = 1. The check is true again, so the body runs."
+          "say": "Back to line 2: i++ makes i = 1. The check is true again, so the body runs.",
+          "group": "loop"
         },
         {
           "line": 2,
@@ -315,7 +318,8 @@
               "scope": "loop"
             }
           ],
-          "say": "Pass 2: score becomes 4."
+          "say": "Pass 2: score becomes 4.",
+          "group": "loop"
         },
         {
           "line": 1,
@@ -339,7 +343,8 @@
               "changed": true
             }
           ],
-          "say": "Line 2 again: i++ makes i = 2. Still true, so one more pass."
+          "say": "Line 2 again: i++ makes i = 2. Still true, so one more pass.",
+          "group": "loop"
         },
         {
           "line": 2,
@@ -362,7 +367,8 @@
               "scope": "loop"
             }
           ],
-          "say": "Pass 3: score becomes 6."
+          "say": "Pass 3: score becomes 6.",
+          "group": "loop"
         },
         {
           "line": 1,
@@ -386,7 +392,8 @@
               "changed": true
             }
           ],
-          "say": "Line 2: i++ makes i = 3. Now the check is false, so the loop stops."
+          "say": "Line 2: i++ makes i = 3. Now the check is false, so the loop stops.",
+          "group": "loop"
         },
         {
           "line": 4,

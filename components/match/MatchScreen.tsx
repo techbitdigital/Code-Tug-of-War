@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useReducedMotion } from "framer-motion";
 import Reveal from "@/components/reveal/Reveal";
 import { correctAnswerText, ropeDecided, type MatchConfig, type RoundResult, type Side } from "@/lib/engine";
 import type { Round } from "@/lib/types";
@@ -30,14 +29,18 @@ interface MatchScreenProps {
   config: MatchConfig;
   /** Optional extra UI with access to the live match (the dev page uses it for host controls). */
   children?: (match: Match) => ReactNode;
+  /**
+   * Open the reveal by itself this long after a round ends. Leave unset in class: the round
+   * summary then stays up until the host clicks, so the room can talk about who said what.
+   */
+  autoRevealMs?: number;
+  /** Shows "New setup" on the results screen. */
+  onExit?: () => void;
 }
-
-// How long the "who pulled" moment plays before the reveal opens.
-const TUG_MS = 2600;
 
 // The playable match: engine state in, stage out. Everything visual lives in the
 // components it composes; this file only wires them to the engine.
-export default function MatchScreen({ config, children }: MatchScreenProps) {
+export default function MatchScreen({ config, children, autoRevealMs, onExit }: MatchScreenProps) {
   const match = useMatch(config);
   const { state, actions, round, timerFraction, secondsLeft, countdownLeft } = match;
   const [soundOn, setSoundOn] = useState(true);
@@ -50,17 +53,18 @@ export default function MatchScreen({ config, children }: MatchScreenProps) {
   const concealed = phase === "ready" || phase === "countdown";
   const matchOver = ropeDecided(state) || state.roundIndex >= config.rounds.length - 1;
 
-  // After a round ends, let the tug play out before the reveal covers the stage.
-  const reduced = useReducedMotion() ?? false;
+  // After a round ends the summary stays up (the rope tug plays meanwhile) until the host
+  // opens the reveal, unless autoRevealMs is set.
   const [revealOpen, setRevealOpen] = useState(false);
   useEffect(() => {
     if (phase !== "reveal") {
       setRevealOpen(false);
       return;
     }
-    const t = setTimeout(() => setRevealOpen(true), reduced ? 1200 : TUG_MS);
+    if (autoRevealMs === undefined) return;
+    const t = setTimeout(() => setRevealOpen(true), autoRevealMs);
     return () => clearTimeout(t);
-  }, [phase, state.roundIndex, reduced]);
+  }, [phase, state.roundIndex, autoRevealMs]);
 
   const statusFor = (side: Side): PanelStatus => {
     if (concealed) return "hidden";
@@ -99,15 +103,16 @@ export default function MatchScreen({ config, children }: MatchScreenProps) {
       paused ? <PausedCard onResume={actions.resume} /> : <Countdown seconds={countdownLeft} />
     ) : phase === "over" ? (
       replayIndex === null ? (
-        <ResultCard state={state} onRestart={actions.restart} onReplay={setReplayIndex} />
+        <ResultCard state={state} onRestart={actions.restart} onReplay={setReplayIndex} onExit={onExit} />
       ) : (
-        <ReplaySheet>
+        <ReplaySheet onClose={() => setReplayIndex(null)}>
           <RoundReveal
             round={config.rounds[replayIndex]}
             result={state.history[replayIndex]}
             names={names}
             finishLabel="Back to results"
             onFinish={() => setReplayIndex(null)}
+            onClose={() => setReplayIndex(null)}
           />
         </ReplaySheet>
       )
@@ -173,15 +178,18 @@ function RoundReveal({
   names,
   finishLabel,
   onFinish,
+  onClose,
 }: {
   round: Round;
   result: RoundResult;
   names: Record<Side, string>;
   finishLabel: string;
   onFinish: () => void;
+  onClose?: () => void;
 }) {
   return (
     <Reveal
+      onClose={onClose}
       key={round.id}
       frames={round.reveal}
       code={round.code}

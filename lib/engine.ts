@@ -4,7 +4,8 @@
 // Rules (agreed after the Oct 10 playtest):
 // - Each team locks in ONE answer per round. Nobody sees right or wrong until the reveal.
 // - The round ends when both teams have locked in, the time runs out, or the host closes it.
-// - If one team is right, it pulls. If both are right, the faster one pulls.
+// - If one team is right, it pulls. If both are right, the faster one pulls, but only when
+//   it was clearly faster (more than `clearWinMs`); a closer race is a dead heat (no pull).
 // - Win rule is rope distance: drag the rope `pullsToWin` steps your way to win early;
 //   otherwise whoever the rope leans toward after the last question wins (centre = draw).
 import type { Answer, Round } from "./types";
@@ -22,6 +23,8 @@ export interface MatchConfig {
   defaultTimeLimitSec: number;
   /** The 3-2-1 before the first question. 0 skips it. */
   countdownMs: number;
+  /** Both teams right: the faster one pulls only if it was this much faster. */
+  clearWinMs: number;
   /** Solo only: how often the robot gets it right, 0..1. */
   robotAccuracy: number;
   /** Solo only: the robot locks in somewhere in this window after the question appears. */
@@ -36,6 +39,7 @@ export const DEFAULT_CONFIG: Omit<MatchConfig, "rounds"> = {
   teamNames: { a: "Team A", b: "Team B" },
   defaultTimeLimitSec: 30,
   countdownMs: 3000,
+  clearWinMs: 3000,
   robotAccuracy: 0.65,
   robotDelayMs: [6000, 14000],
   seed: 1,
@@ -61,7 +65,7 @@ export interface RoundResult {
   roundId: string;
   /** Team that pulled, or null when nobody was right (or nobody answered). */
   winner: Side | null;
-  reason: "only-correct" | "faster" | "none-correct" | "no-answers" | "closed";
+  reason: "only-correct" | "faster" | "dead-heat" | "none-correct" | "no-answers" | "closed";
   answers: Record<Side, LockedAnswer | null>;
   /** Rope position after this round. */
   rope: number;
@@ -215,9 +219,14 @@ function resolve(state: MatchState, closedByHost = false): MatchState {
   if (!a && !b) {
     reason = closedByHost ? "closed" : "no-answers";
   } else if (a?.correct && b?.correct) {
-    // Both right: speed breaks the tie. An exact tie is no pull.
-    winner = a.timeMs < b.timeMs ? "a" : b.timeMs < a.timeMs ? "b" : null;
-    reason = "faster";
+    // Both right: only a clearly faster team pulls. Otherwise understanding was equal.
+    const gap = Math.abs(a.timeMs - b.timeMs);
+    if (gap > state.config.clearWinMs) {
+      winner = a.timeMs < b.timeMs ? "a" : "b";
+      reason = "faster";
+    } else {
+      reason = "dead-heat";
+    }
   } else if (a?.correct) {
     winner = "a";
     reason = "only-correct";

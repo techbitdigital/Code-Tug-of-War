@@ -39,6 +39,11 @@ describe("lintRound", () => {
     expect(issues.some((i) => i.message.includes("Runtime panel"))).toBe(true);
   });
 
+  it("a comparison must end in true or false (the re-test's missing '3 < 3 → false')", () => {
+    const issues = lintRound(base([{ line: 0, layer: "runtime", eval: ["i++", "i < 3"], say: "Checks the loop." }]));
+    expect(issues).toContainEqual(expect.objectContaining({ level: "error", message: expect.stringContaining("true or false") }));
+  });
+
   it("the shipped packs have no errors or warnings", () => {
     const all = getPacks().flatMap((p) => p.rounds.flatMap(lintRound));
     expect(all).toEqual([]);

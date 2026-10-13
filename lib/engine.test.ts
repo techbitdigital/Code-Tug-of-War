@@ -91,15 +91,17 @@ describe("resolving a round", () => {
     expect(s.rope).toBe(-1);
   });
 
-  it("if both are right, the faster team pulls", () => {
-    const s = run(started(), ans("b", 1, 4000), ans("a", 1, 2500));
+  it("if both are right, a clearly faster team (more than 3s) pulls", () => {
+    const s = run(started(), ans("a", 1, 2500), ans("b", 1, 6000));
     expect(s.lastResult).toMatchObject({ winner: "a", reason: "faster" });
   });
 
-  it("an exact tie is no pull", () => {
-    const s = run(started(), ans("a", 1, 3000), ans("b", 1, 3000));
-    expect(s.lastResult?.winner).toBeNull();
-    expect(s.rope).toBe(0);
+  it("if both are right within 3s, it's a dead heat: no pull", () => {
+    const close = run(started(), ans("a", 1, 12_500), ans("b", 1, 13_700)); // the 1.2s gap from the re-test
+    expect(close.lastResult).toMatchObject({ winner: null, reason: "dead-heat" });
+    expect(close.rope).toBe(0);
+    const exact = run(started(), ans("a", 1, 3000), ans("b", 1, 6000)); // exactly 3s is still a dead heat
+    expect(exact.lastResult?.reason).toBe("dead-heat");
   });
 
   it("if nobody is right, nobody pulls", () => {
@@ -220,10 +222,12 @@ describe("solo robot", () => {
   });
 
   it("when the player locks in, the robot's planned answer counts and the round closes at once", () => {
-    const fast = run(solo(1), ans("a", 1, 3000));
+    const fast = run(solo(1), ans("a", 1, 1000)); // robot at 5s: 4s slower
     expect(fast.lastResult).toMatchObject({ winner: "a", reason: "faster" });
-    const slow = run(solo(1), ans("a", 1, 8000));
+    const slow = run(solo(1), ans("a", 1, 9000));
     expect(slow.lastResult).toMatchObject({ winner: "b", reason: "faster" });
+    const close = run(solo(1), ans("a", 1, 6000));
+    expect(close.lastResult).toMatchObject({ winner: null, reason: "dead-heat" });
   });
 
   it("a wrong robot lets a right player pull", () => {

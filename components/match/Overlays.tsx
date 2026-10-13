@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, Check, Eye, Pause, Play, RotateCcw, Timer, Trophy, X, Zap } from "lucide-react";
+import { ArrowDown, Check, Eye, Pause, Play, RotateCcw, Settings2, Timer, Trophy, X, Zap } from "lucide-react";
 import { answerText, correctAnswerText, type LockedAnswer, type MatchState, type RoundResult, type Side } from "@/lib/engine";
 import { motionTokens } from "@/lib/motion";
 import type { Round } from "@/lib/types";
@@ -179,8 +179,10 @@ export function headlineFor(result: RoundResult, names: Record<Side, string>) {
   switch (result.reason) {
     case "none-correct":
       return "Nobody got it";
+    case "dead-heat":
+      return "Dead heat: no pull";
     case "no-answers":
-      return "Time's up!";
+      return "Time's up: nobody locked in";
     case "closed":
       return "Round closed";
     default:
@@ -191,7 +193,9 @@ export function headlineFor(result: RoundResult, names: Record<Side, string>) {
 function reasonText(result: RoundResult, names: Record<Side, string>) {
   if (result.reason === "faster" && result.winner) return `Both right. ${names[result.winner]} locked in first.`;
   if (result.reason === "only-correct" && result.winner) return `Only ${names[result.winner]} got it right.`;
-  if (result.reason === "faster") return "Both right at exactly the same time.";
+  if (result.reason === "dead-heat") return "Both right, less than 3 seconds apart, so the rope stays put.";
+  if (result.reason === "no-answers") return "Neither team locked in an answer before the time ran out.";
+  if (result.reason === "none-correct") return "Both teams locked in, but neither answer was right.";
   return null;
 }
 
@@ -332,21 +336,26 @@ export function ResultCard({
   state,
   onRestart,
   onReplay,
+  onExit,
 }: {
   state: MatchState;
   onRestart: () => void;
   onReplay: (roundIndex: number) => void;
+  /** Back to the setup screen (new teams, pack or settings). */
+  onExit?: () => void;
 }) {
   const { winner, config, history, teams, rope } = state;
   const names = config.teamNames;
+  const played = history.length;
   const stat = (side: Side) => {
-    const answered = history.filter((r) => r.answers[side]).length;
     const right = teams[side].correctTotal;
+    const noAnswer = history.filter((r) => !r.answers[side]).length;
     const correctTimes = history.map((r) => r.answers[side]).filter((a) => a?.correct).map((a) => a!.timeMs);
     return {
-      right,
+      // Out of every question played, so skipping a question can't push accuracy up.
+      accuracy: played ? `${right} of ${played} (${Math.round((right / played) * 100)}%)` : "–",
       wrong: teams[side].wrongTotal,
-      accuracy: answered ? `${Math.round((right / answered) * 100)}%` : "–",
+      noAnswer,
       fastest: correctTimes.length ? `${(Math.min(...correctTimes) / 1000).toFixed(1)}s` : "–",
       pulls: history.filter((r) => r.winner === side).length,
     };
@@ -354,9 +363,9 @@ export function ResultCard({
   const s = { a: stat("a"), b: stat("b") };
   const rows: [string, keyof ReturnType<typeof stat>][] = [
     ["Pulls", "pulls"],
-    ["Right", "right"],
+    ["Right answers", "accuracy"],
     ["Wrong", "wrong"],
-    ["Accuracy", "accuracy"],
+    ["No answer", "noAnswer"],
     ["Fastest right answer", "fastest"],
   ];
 
@@ -441,18 +450,32 @@ export function ResultCard({
         </div>
       </div>
 
-      <ActionButton onClick={onRestart} autoFocus>
-        <RotateCcw className="size-[1em]" strokeWidth={3} aria-hidden="true" /> Play again
-      </ActionButton>
+      <div className="flex flex-wrap justify-center gap-[var(--gap)]">
+        {onExit && (
+          <ActionButton onClick={onExit} tone="plain">
+            <Settings2 className="size-[1em]" strokeWidth={3} aria-hidden="true" /> New setup
+          </ActionButton>
+        )}
+        <ActionButton onClick={onRestart} autoFocus>
+          <RotateCcw className="size-[1em]" strokeWidth={3} aria-hidden="true" /> Play again
+        </ActionButton>
+      </div>
     </Modal>
   );
 }
 
 /** A big sheet over everything, used to replay a round's reveal from the results. */
-export function ReplaySheet({ children }: { children: ReactNode }) {
+export function ReplaySheet({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   if (!usePortal()) return null;
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label="Replay" className="match-dialog-layer match-dialog-layer--sheet">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Replay"
+      className="match-dialog-layer match-dialog-layer--sheet"
+      // A click on the dimmed backdrop (not the sheet) closes it.
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="match-replay @container">{children}</div>
     </div>,
     document.body,

@@ -23,7 +23,8 @@ Every round is written to the same level of detail, so learners always know what
 | --- | --- |
 | `line` | 0-indexed. Leave it out only on step 1. |
 | `layer` | The deepest layer this step changes: `code`, `runtime`, `memory` or `output`. |
-| `eval` | What the engine works out, one stage per item: `["score + 2", "0 + 2", "2"]`. Needed on every runtime step. |
+| `eval` | What the engine works out, one stage per item: `["score + 2", "0 + 2", "2"]`. Needed on every runtime step. A comparison must end in its result: `["i < 3", "3 < 3", "false"]` (true shows green, false red). |
+| `group` | Put the same value (e.g. `"loop"`) on every step of a repeating part, so the reveal offers "Skip to end of loop". |
 | `memory` | The **full** picture of every box at this step. Mark `"changed": true` only on boxes whose value is new. |
 | `scope` | `"global"` (default), the call (`"double(5)"`), or `"loop"`. When a frame pops or a loop ends, its boxes disappear from the next step. |
 | `stack` | Top first, e.g. `["double(5)", "global"]`, on any step inside a call. |
