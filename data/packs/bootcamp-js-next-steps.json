@@ -6,7 +6,7 @@
     "general"
   ],
   "track": "beginner",
-  "estMinutes": 6,
+  "estMinutes": 25,
   "rounds": [
     {
       "id": "js-if-01",
@@ -389,6 +389,1177 @@
             }
           ],
           "say": "Line 3: one side is a string, so + joins them as text and prints 52."
+        }
+      ]
+    },
+    {
+      "id": "js-elseif-01",
+      "concept": "else if",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let score = 72;",
+          "if (score >= 80) console.log(\"A\");",
+          "else if (score >= 70) console.log(\"B\");",
+          "else console.log(\"C\");"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "A",
+          "B",
+          "C",
+          "B C"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "72 >= 80 is false, so the first line is skipped.",
+          "",
+          "C only runs if every check above it is false. 72 >= 70 is true.",
+          "Once one branch runs, the rest of the chain is skipped."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "score",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called score. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "72"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "72",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: score gets 72."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "score >= 80",
+            "72 >= 80",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "score",
+              "value": "72",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 checks score >= 80. That's false, so it moves on."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "score >= 70",
+            "72 >= 70",
+            "true"
+          ],
+          "output": "B",
+          "memory": [
+            {
+              "name": "score",
+              "value": "72",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3 checks the next condition. It's true, so it prints B and skips the else."
+        }
+      ]
+    },
+    {
+      "id": "js-and-01",
+      "concept": "&& needs both",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let age = 20;",
+          "let hasTicket = false;",
+          "if (age >= 18 && hasTicket) console.log(\"in\");",
+          "else console.log(\"wait\");"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "in",
+          "wait",
+          "in wait",
+          "nothing"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "&& needs both sides to be true. hasTicket is false.",
+          "",
+          "if / else runs exactly one of the two lines.",
+          "When the if is false, the else line runs."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "age",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            },
+            {
+              "name": "hasTicket",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes boxes for age and hasTicket. Neither is ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "20"
+          ],
+          "memory": [
+            {
+              "name": "age",
+              "value": "20",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "hasTicket",
+              "value": "",
+              "scope": "global",
+              "uninitialized": true
+            }
+          ],
+          "say": "Line 1: age gets 20."
+        },
+        {
+          "line": 1,
+          "layer": "memory",
+          "eval": [
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "age",
+              "value": "20",
+              "scope": "global"
+            },
+            {
+              "name": "hasTicket",
+              "value": "false",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: hasTicket gets false."
+        },
+        {
+          "line": 2,
+          "layer": "runtime",
+          "eval": [
+            "age >= 18 && hasTicket",
+            "true && false",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "age",
+              "value": "20",
+              "scope": "global"
+            },
+            {
+              "name": "hasTicket",
+              "value": "false",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: age >= 18 is true, but && needs both sides, and hasTicket is false."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "eval": [
+            "\"wait\""
+          ],
+          "output": "wait",
+          "memory": [
+            {
+              "name": "age",
+              "value": "20",
+              "scope": "global"
+            },
+            {
+              "name": "hasTicket",
+              "value": "false",
+              "scope": "global"
+            }
+          ],
+          "say": "So the else line runs and prints wait."
+        }
+      ]
+    },
+    {
+      "id": "js-or-01",
+      "concept": "|| needs one",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let day = \"Sat\";",
+          "if (day === \"Sat\" || day === \"Sun\") console.log(\"rest\");",
+          "else console.log(\"work\");"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "rest",
+          "work",
+          "rest work",
+          "error"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "|| only needs one side to be true, and day === \"Sat\" is true.",
+          "Only one branch of an if / else ever runs.",
+          "Comparing strings with === is fine."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "day",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called day. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"Sat\""
+          ],
+          "memory": [
+            {
+              "name": "day",
+              "value": "\"Sat\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: day gets the text \"Sat\"."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "day === \"Sat\" || …",
+            "true || …",
+            "true"
+          ],
+          "output": "rest",
+          "memory": [
+            {
+              "name": "day",
+              "value": "\"Sat\"",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: the first check is already true, and || needs only one true side, so it prints rest."
+        }
+      ]
+    },
+    {
+      "id": "js-truthy-01",
+      "concept": "empty string is falsy",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let name = \"\";",
+          "if (name) console.log(\"hi \" + name);",
+          "else console.log(\"no name\");"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "hi",
+          "no name",
+          "hi undefined",
+          "error"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "An empty string counts as false in an if, so that line is skipped.",
+          "",
+          "name exists. It just holds empty text.",
+          "Any value can go in an if. JavaScript decides if it counts as true or false."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "name",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called name. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"\""
+          ],
+          "memory": [
+            {
+              "name": "name",
+              "value": "\"\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: name gets empty text, \"\"."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "name",
+            "\"\"",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "name",
+              "value": "\"\"",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: an empty string counts as false in an if, so the first line is skipped."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "\"no name\""
+          ],
+          "output": "no name",
+          "memory": [
+            {
+              "name": "name",
+              "value": "\"\"",
+              "scope": "global"
+            }
+          ],
+          "say": "The else line runs and prints no name."
+        }
+      ]
+    },
+    {
+      "id": "js-last-01",
+      "concept": "last item",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let days = [\"Mon\", \"Tue\", \"Wed\"];",
+          "console.log(days[days.length - 1]);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "Mon",
+          "Wed",
+          "undefined",
+          "3"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "Mon is days[0], the first item.",
+          "",
+          "days[3] would be undefined, but here it's days[3 - 1], which is days[2].",
+          "3 is the length. It's then used to find a position."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "days",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called days. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[\"Mon\", \"Tue\", \"Wed\"]"
+          ],
+          "memory": [
+            {
+              "name": "days",
+              "value": "[\"Mon\", \"Tue\", \"Wed\"]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: days gets a list of 3 items, at positions 0, 1 and 2."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "days.length - 1",
+            "3 - 1",
+            "2",
+            "days[2]",
+            "\"Wed\""
+          ],
+          "output": "Wed",
+          "memory": [
+            {
+              "name": "days",
+              "value": "[\"Mon\", \"Tue\", \"Wed\"]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: length is 3, so 3 - 1 gives 2, the last position. It prints Wed."
+        }
+      ]
+    },
+    {
+      "id": "js-oob-01",
+      "concept": "index past the end",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let nums = [10, 20, 30];",
+          "console.log(nums[3]);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "30",
+          "undefined",
+          "error",
+          "0"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "30 is nums[2]. Counting from 0, the last position is 2.",
+          "",
+          "JavaScript doesn't stop with an error here. A missing position just gives undefined.",
+          "Nothing is stored at position 3, and JavaScript doesn't fill gaps with 0."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "nums",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called nums. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[10, 20, 30]"
+          ],
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[10, 20, 30]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: nums gets 3 items, at positions 0, 1 and 2."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "nums[3]",
+            "undefined"
+          ],
+          "output": "undefined",
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[10, 20, 30]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 asks for position 3. There is nothing there, so it prints undefined."
+        }
+      ]
+    },
+    {
+      "id": "js-ref-01",
+      "concept": "two names, one list",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let a = [1, 2];",
+          "let b = a;",
+          "b.push(3);",
+          "console.log(a.length);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "2",
+          "3",
+          "1",
+          "error"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "b isn't a copy. It points at the same list as a, so a sees the push.",
+          "",
+          "a has at least the 2 items it started with.",
+          "Pushing onto b is fine. b is a list."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "a",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            },
+            {
+              "name": "b",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes boxes for a and b. Neither is ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[1, 2]"
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "[1, 2]",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "b",
+              "value": "",
+              "scope": "global",
+              "uninitialized": true
+            }
+          ],
+          "say": "Line 1: a gets a list, [1, 2]."
+        },
+        {
+          "line": 1,
+          "layer": "memory",
+          "eval": [
+            "a",
+            "the list itself"
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "[1, 2]",
+              "scope": "global"
+            },
+            {
+              "name": "b",
+              "value": "→ same list as a",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: b doesn't get a copy. It points at the very same list as a."
+        },
+        {
+          "line": 2,
+          "layer": "runtime",
+          "eval": [
+            "b.push(3)",
+            "[1, 2, 3]"
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "[1, 2, 3]",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "b",
+              "value": "→ same list as a",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: push adds 3 to that one shared list, so a now shows [1, 2, 3] too."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "eval": [
+            "a.length",
+            "3"
+          ],
+          "output": "3",
+          "memory": [
+            {
+              "name": "a",
+              "value": "[1, 2, 3]",
+              "scope": "global"
+            },
+            {
+              "name": "b",
+              "value": "→ same list as a",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4 counts a's items and prints 3."
+        }
+      ]
+    },
+    {
+      "id": "js-forof-01",
+      "concept": "for...of total",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let prices = [5, 10, 15];",
+          "let sum = 0;",
+          "for (let p of prices) sum += p;",
+          "console.log(sum);"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "30",
+          "15",
+          "51015",
+          "3"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "15 is only the last price. sum += p adds every price.",
+          "These are numbers, so += adds them. It doesn't join them as text.",
+          "3 is how many prices there are, not their total."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "prices",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            },
+            {
+              "name": "sum",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes boxes for prices and sum. There is no p yet: it belongs to the loop."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[5, 10, 15]"
+          ],
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "sum",
+              "value": "",
+              "scope": "global",
+              "uninitialized": true
+            }
+          ],
+          "say": "Line 1: prices gets a list of 3 numbers."
+        },
+        {
+          "line": 1,
+          "layer": "memory",
+          "eval": [
+            "0"
+          ],
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global"
+            },
+            {
+              "name": "sum",
+              "value": "0",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: sum starts at 0."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "sum + p",
+            "0 + 5",
+            "5"
+          ],
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global"
+            },
+            {
+              "name": "sum",
+              "value": "5",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "p",
+              "value": "5",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Pass 1: p = 5, so sum becomes 5."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "sum + p",
+            "5 + 10",
+            "15"
+          ],
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global"
+            },
+            {
+              "name": "sum",
+              "value": "15",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "p",
+              "value": "10",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Pass 2: p = 10, so sum becomes 15."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "sum + p",
+            "15 + 15",
+            "30"
+          ],
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global"
+            },
+            {
+              "name": "sum",
+              "value": "30",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "p",
+              "value": "15",
+              "scope": "loop",
+              "changed": true
+            }
+          ],
+          "say": "Pass 3: p = 15, so sum becomes 30."
+        },
+        {
+          "line": 2,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next p",
+            "none left"
+          ],
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global"
+            },
+            {
+              "name": "sum",
+              "value": "30",
+              "scope": "global"
+            }
+          ],
+          "say": "No prices left, so the loop ends and its p is thrown away."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "eval": [
+            "sum",
+            "30"
+          ],
+          "output": "30",
+          "memory": [
+            {
+              "name": "prices",
+              "value": "[5, 10, 15]",
+              "scope": "global"
+            },
+            {
+              "name": "sum",
+              "value": "30",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4 prints 30."
+        }
+      ]
+    },
+    {
+      "id": "js-upper-01",
+      "concept": "toUpperCase",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let city = \"abuja\";",
+          "console.log(city.toUpperCase());"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "ABUJA",
+          "Abuja",
+          "abuja",
+          "error"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "toUpperCase changes every letter, not just the first.",
+          "toUpperCase gives back a new, changed string. That's what gets printed.",
+          "toUpperCase is a built-in string method, so it works on any text."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "city",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called city. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"abuja\""
+          ],
+          "memory": [
+            {
+              "name": "city",
+              "value": "\"abuja\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: city gets the text \"abuja\"."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "city.toUpperCase()",
+            "\"ABUJA\""
+          ],
+          "output": "ABUJA",
+          "memory": [
+            {
+              "name": "city",
+              "value": "\"abuja\"",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 makes a new, all-capital copy and prints ABUJA. city itself is unchanged."
+        }
+      ]
+    },
+    {
+      "id": "js-char-01",
+      "concept": "characters by index",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let word = \"code\";",
+          "console.log(word[0] + word[3]);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "ce",
+          "cd",
+          "co",
+          "undefined"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "word[3] is the 4th character. Counting from 0: c(0) o(1) d(2) e(3).",
+          "o is word[1], not word[3].",
+          "Both positions exist in \"code\", which has 4 characters (0 to 3)."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "word",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called word. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"code\""
+          ],
+          "memory": [
+            {
+              "name": "word",
+              "value": "\"code\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: word gets \"code\". Its characters sit at positions 0 to 3."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "word[0] + word[3]",
+            "\"c\" + \"e\"",
+            "\"ce\""
+          ],
+          "output": "ce",
+          "memory": [
+            {
+              "name": "word",
+              "value": "\"code\"",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: word[0] is c and word[3] is e. Joining them prints ce."
+        }
+      ]
+    },
+    {
+      "id": "js-template-01",
+      "concept": "template literal",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let n = 3;",
+          "console.log(`I have ${n + 1} pens`);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "I have 4 pens",
+          "I have 31 pens",
+          "I have n + 1 pens",
+          "I have 3 pens"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "Inside ${ } the engine does maths: 3 + 1 is 4, not \"3\" followed by \"1\".",
+          "Code inside ${ } is worked out first. It isn't printed as it's written.",
+          "The 1 is added first, so it's 4."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "n",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called n. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "3"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "3",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: n gets 3."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "n + 1",
+            "3 + 1",
+            "4",
+            "`I have 4 pens`"
+          ],
+          "output": "I have 4 pens",
+          "memory": [
+            {
+              "name": "n",
+              "value": "3",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: the engine works out ${n + 1} first, which is 4, then drops it into the text."
         }
       ]
     }

@@ -7,7 +7,7 @@
     "general"
   ],
   "track": "beginner",
-  "estMinutes": 7,
+  "estMinutes": 25,
   "rounds": [
     {
       "id": "py-var-01",
@@ -550,6 +550,1225 @@
             }
           ],
           "say": "Line 4: print shows Hi Ada, without the quotes."
+        }
+      ]
+    },
+    {
+      "id": "py-div-01",
+      "concept": "/ gives a decimal",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "a = 7",
+          "b = 2",
+          "print(a / b)"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "3.5",
+          "3",
+          "3.0",
+          "4"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "3 is what // gives (whole-number division). A single / keeps the .5.",
+          "7 / 2 doesn't divide evenly, so the .5 stays.",
+          "/ doesn't round up. 7 / 2 is exactly 3.5."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "7"
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "7",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: a gets 7."
+        },
+        {
+          "line": 1,
+          "layer": "memory",
+          "eval": [
+            "2"
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "7",
+              "scope": "global"
+            },
+            {
+              "name": "b",
+              "value": "2",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: b gets 2."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "a / b",
+            "7 / 2",
+            "3.5"
+          ],
+          "output": "3.5",
+          "memory": [
+            {
+              "name": "a",
+              "value": "7",
+              "scope": "global"
+            },
+            {
+              "name": "b",
+              "value": "2",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: / is true division, so 7 / 2 gives 3.5."
+        }
+      ]
+    },
+    {
+      "id": "py-floor-01",
+      "concept": "// and %",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "print(17 // 5, 17 % 5)"
+        ],
+        "focusLine": 0
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "3 2",
+          "3.4 2",
+          "3 3",
+          "2 3"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "// drops the decimal part. It gives a whole number of times 5 fits.",
+          "% gives the remainder: 17 is 3 fives (15) with 2 left over.",
+          "// comes first and gives 3. % gives the leftover, 2."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "runtime",
+          "eval": [
+            "17 // 5",
+            "3"
+          ],
+          "say": "// asks how many whole times 5 fits into 17: 3."
+        },
+        {
+          "line": 0,
+          "layer": "output",
+          "eval": [
+            "17 % 5",
+            "2"
+          ],
+          "output": "3 2",
+          "say": "% asks what is left over: 17 - 15 is 2. print shows both, separated by a space."
+        }
+      ]
+    },
+    {
+      "id": "py-strmul-01",
+      "concept": "string * number",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "word = \"ha\"",
+          "print(word * 3)"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "hahaha",
+          "ha3",
+          "error",
+          "ha ha ha"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "* repeats the text. It doesn't stick the number on the end.",
+          "Python allows text * whole number. It means repeat.",
+          "Repeating adds no spaces in between."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"ha\""
+          ],
+          "memory": [
+            {
+              "name": "word",
+              "value": "\"ha\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: word gets the text \"ha\"."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "word * 3",
+            "\"ha\" * 3",
+            "\"hahaha\""
+          ],
+          "output": "hahaha",
+          "memory": [
+            {
+              "name": "word",
+              "value": "\"ha\"",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: text * 3 repeats the text 3 times, so it prints hahaha."
+        }
+      ]
+    },
+    {
+      "id": "py-append-01",
+      "concept": "append and len",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "nums = [3, 1]",
+          "nums.append(4)",
+          "print(len(nums))"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "3",
+          "2",
+          "4",
+          "8"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "2 was the length before append added an item.",
+          "4 is the item that was added, not how many items there are.",
+          "len counts the items. It doesn't add them up (3 + 1 + 4)."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[3, 1]"
+          ],
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[3, 1]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: nums gets a list of 2 numbers."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "nums.append(4)",
+            "[3, 1, 4]"
+          ],
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[3, 1, 4]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: append adds 4 to the end of the same list."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "len(nums)",
+            "3"
+          ],
+          "output": "3",
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[3, 1, 4]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: len counts the items and prints 3."
+        }
+      ]
+    },
+    {
+      "id": "py-slice-01",
+      "concept": "list slicing",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "letters = [\"a\", \"b\", \"c\", \"d\"]",
+          "print(letters[1:3])"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "['b', 'c']",
+          "['b', 'c', 'd']",
+          "['a', 'b']",
+          "['c', 'd']"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "A slice stops before the end number, so position 3 (d) isn't included.",
+          "Positions start at 0. 1:3 starts at b, not a.",
+          "c is position 2. The slice starts at position 1."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[\"a\", \"b\", \"c\", \"d\"]"
+          ],
+          "memory": [
+            {
+              "name": "letters",
+              "value": "[\"a\", \"b\", \"c\", \"d\"]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: letters gets 4 items, at positions 0 to 3."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "letters[1:3]",
+            "positions 1, 2",
+            "['b', 'c']"
+          ],
+          "output": "['b', 'c']",
+          "memory": [
+            {
+              "name": "letters",
+              "value": "[\"a\", \"b\", \"c\", \"d\"]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: [1:3] takes position 1 up to, but not including, position 3. That's b and c."
+        }
+      ]
+    },
+    {
+      "id": "py-elif-01",
+      "concept": "if / elif",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "temp = 30",
+          "if temp > 32:",
+          "    print(\"hot\")",
+          "elif temp > 25:",
+          "    print(\"warm\")"
+        ],
+        "focusLine": 3
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "hot",
+          "warm",
+          "hot warm",
+          "nothing"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "30 > 32 is false, so \"hot\" is skipped.",
+          "",
+          "Only one branch of an if / elif chain runs.",
+          "The elif check is true, so something does print."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "30"
+          ],
+          "memory": [
+            {
+              "name": "temp",
+              "value": "30",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: temp gets 30."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "temp > 32",
+            "30 > 32",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "temp",
+              "value": "30",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 checks temp > 32. That's false, so line 3 is skipped."
+        },
+        {
+          "line": 3,
+          "layer": "runtime",
+          "eval": [
+            "temp > 25",
+            "30 > 25",
+            "true"
+          ],
+          "memory": [
+            {
+              "name": "temp",
+              "value": "30",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4 checks the elif: temp > 25 is true."
+        },
+        {
+          "line": 4,
+          "layer": "output",
+          "eval": [
+            "\"warm\""
+          ],
+          "output": "warm",
+          "memory": [
+            {
+              "name": "temp",
+              "value": "30",
+              "scope": "global"
+            }
+          ],
+          "say": "So line 5 runs and prints warm."
+        }
+      ]
+    },
+    {
+      "id": "py-while-01",
+      "concept": "while loop",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "n = 10",
+          "while n > 3:",
+          "    n = n - 4",
+          "print(n)"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "2",
+          "6",
+          "-2",
+          "3"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "6 > 3 is still true, so the body runs once more.",
+          "At 2, the check 2 > 3 is false, so the loop stops before going below 0.",
+          "3 is the number in the check. n never actually equals 3."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "10"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "10",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: n starts at 10."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "n > 3",
+            "10 > 3",
+            "true"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "10",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 checks n > 3. It's true, so the body runs."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "n - 4",
+            "10 - 4",
+            "6"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "6",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "n becomes 6."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "n > 3",
+            "6 > 3",
+            "true"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "6",
+              "scope": "global"
+            }
+          ],
+          "say": "Check again: 6 > 3 is true."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "n - 4",
+            "6 - 4",
+            "2"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "2",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "n becomes 2."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "n > 3",
+            "2 > 3",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "n",
+              "value": "2",
+              "scope": "global"
+            }
+          ],
+          "say": "Check again: now it's false, so the loop stops."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "eval": [
+            "n",
+            "2"
+          ],
+          "output": "2",
+          "memory": [
+            {
+              "name": "n",
+              "value": "2",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4 prints 2."
+        }
+      ]
+    },
+    {
+      "id": "py-range-02",
+      "concept": "range with a step",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "total = 0",
+          "for i in range(0, 10, 3):",
+          "    total = total + i",
+          "print(total)"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "18",
+          "9",
+          "27",
+          "12"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "9 is only the last i. total adds every i: 0 + 3 + 6 + 9.",
+          "27 would mean adding numbers past 9. range stops before 10, so i is only 0, 3, 6 and 9.",
+          "That's just 3 + 9. total adds every i, including 0 and 6: 0 + 3 + 6 + 9."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "0"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "0",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: total starts at 0."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "range(0, 10, 3)",
+            "0, 3, 6, 9"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "0",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "0",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: range(0, 10, 3) counts in 3s and stops before 10. First, i = 0."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + i",
+            "0 + 0",
+            "0"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "0",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "0",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 1: total + 0 is still 0."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next i",
+            "3"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "0",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "3",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Next, i = 3."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + i",
+            "0 + 3",
+            "3"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "3",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "i",
+              "value": "3",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 2: total becomes 3."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next i",
+            "6"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "3",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "6",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Next, i = 6."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + i",
+            "3 + 6",
+            "9"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "9",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "i",
+              "value": "6",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 3: total becomes 9."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next i",
+            "9"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "9",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "9",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Next, i = 9, the last value below 10."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + i",
+            "9 + 9",
+            "18"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "18",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "i",
+              "value": "9",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 4: total becomes 18."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next i",
+            "none left"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "18",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "9",
+              "scope": "global"
+            }
+          ],
+          "say": "range has nothing left, so the loop ends."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "eval": [
+            "total",
+            "18"
+          ],
+          "output": "18",
+          "memory": [
+            {
+              "name": "total",
+              "value": "18",
+              "scope": "global"
+            },
+            {
+              "name": "i",
+              "value": "9",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4 prints 18."
+        }
+      ]
+    },
+    {
+      "id": "py-default-01",
+      "concept": "default parameter",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "def area(w, h=2):",
+          "    return w * h",
+          "print(area(5))"
+        ],
+        "focusLine": 0
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "10",
+          "5",
+          "error",
+          "7"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "h isn't missing: it falls back to its default, 2.",
+          "Leaving out h is allowed because it has a default value.",
+          "The function multiplies (w * h). It doesn't add."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "area",
+              "value": "ƒ area(w, h=2)",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: def creates the function area and stores it."
+        },
+        {
+          "line": 2,
+          "layer": "runtime",
+          "stack": [
+            "area(5)",
+            "global"
+          ],
+          "eval": [
+            "area(5)"
+          ],
+          "memory": [
+            {
+              "name": "area",
+              "value": "ƒ area(w, h=2)",
+              "scope": "global"
+            },
+            {
+              "name": "w",
+              "value": "5",
+              "scope": "area(5)",
+              "changed": true
+            },
+            {
+              "name": "h",
+              "value": "2",
+              "scope": "area(5)",
+              "changed": true
+            }
+          ],
+          "say": "Line 3 calls area(5). Only w is given, so the new frame uses the default: h = 2."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "stack": [
+            "area(5)",
+            "global"
+          ],
+          "eval": [
+            "w * h",
+            "5 * 2",
+            "10"
+          ],
+          "memory": [
+            {
+              "name": "area",
+              "value": "ƒ area(w, h=2)",
+              "scope": "global"
+            },
+            {
+              "name": "w",
+              "value": "5",
+              "scope": "area(5)"
+            },
+            {
+              "name": "h",
+              "value": "2",
+              "scope": "area(5)"
+            }
+          ],
+          "say": "Line 2 returns w * h, which is 10."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "stack": [
+            "global"
+          ],
+          "eval": [
+            "area(5)",
+            "10"
+          ],
+          "output": "10",
+          "memory": [
+            {
+              "name": "area",
+              "value": "ƒ area(w, h=2)",
+              "scope": "global"
+            }
+          ],
+          "say": "The frame pops, and print shows the returned 10."
+        }
+      ]
+    },
+    {
+      "id": "py-fstring-01",
+      "concept": "f-strings",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "name = \"Tobi\"",
+          "age = 12",
+          "print(f\"{name} is {age + 1}\")"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "Tobi is 13",
+          "Tobi is 12",
+          "name is 13",
+          "Tobi is 121"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "The f-string works out age + 1 before printing, so it's 13.",
+          "Inside { } the variable's value is used, not its name.",
+          "age is a number, so + 1 adds. It doesn't join text."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"Tobi\""
+          ],
+          "memory": [
+            {
+              "name": "name",
+              "value": "\"Tobi\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: name gets the text \"Tobi\"."
+        },
+        {
+          "line": 1,
+          "layer": "memory",
+          "eval": [
+            "12"
+          ],
+          "memory": [
+            {
+              "name": "name",
+              "value": "\"Tobi\"",
+              "scope": "global"
+            },
+            {
+              "name": "age",
+              "value": "12",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: age gets 12."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "{name}",
+            "Tobi",
+            "{age + 1}",
+            "13"
+          ],
+          "output": "Tobi is 13",
+          "memory": [
+            {
+              "name": "name",
+              "value": "\"Tobi\"",
+              "scope": "global"
+            },
+            {
+              "name": "age",
+              "value": "12",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: each { } is worked out first, then put into the text: Tobi is 13."
+        }
+      ]
+    },
+    {
+      "id": "py-dict-01",
+      "concept": "dictionary lookup",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "scores = {\"Ada\": 90, \"Ben\": 75}",
+          "print(scores[\"Ben\"])"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "75",
+          "90",
+          "Ben",
+          "KeyError"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "90 belongs to the key \"Ada\". scores[\"Ben\"] looks up Ben.",
+          "Looking up a key gives back its value, not the key.",
+          "\"Ben\" is in the dictionary, so there is no KeyError."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "{\"Ada\": 90, \"Ben\": 75}"
+          ],
+          "memory": [
+            {
+              "name": "scores",
+              "value": "{\"Ada\": 90, \"Ben\": 75}",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: scores gets a dictionary that pairs each name with a score."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "scores[\"Ben\"]",
+            "75"
+          ],
+          "output": "75",
+          "memory": [
+            {
+              "name": "scores",
+              "value": "{\"Ada\": 90, \"Ben\": 75}",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 looks up the key \"Ben\" and prints its value, 75."
         }
       ]
     }

@@ -47,7 +47,7 @@ export default function HomePage() {
             <h2 id="packs-heading" className="font-display text-3xl font-black text-ink">
               Choose a pack
             </h2>
-            <p className="mt-1 font-semibold text-ink-muted">Each pack is a short match, 5 to 10 minutes.</p>
+            <p className="mt-1 font-semibold text-ink-muted">Each pack has 15 questions. Play 5 for a quick match, or all of them.</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {packs.map((pack) => (

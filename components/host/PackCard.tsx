@@ -39,7 +39,7 @@ export default function PackCard({ pack }: { pack: Pack }) {
             <ListChecks className="size-4" aria-hidden="true" /> {pack.rounds.length} questions
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <Clock className="size-4" aria-hidden="true" /> ~{pack.estMinutes} min
+            <Clock className="size-4" aria-hidden="true" /> 10–{pack.estMinutes} min
           </span>
         </div>
         <Link

@@ -30,9 +30,25 @@ interface Saved {
   pullsToWin: MatchConfig["pullsToWin"];
   seconds: number;
   level: Level;
+  /** Questions drawn from the pack for one match; 0 = all of them. */
+  count: number;
 }
 
-const DEFAULTS: Saved = { teamA: "", teamB: "", player: "", pullsToWin: 3, seconds: 30, level: "normal" };
+const DEFAULTS: Saved = { teamA: "", teamB: "", player: "", pullsToWin: 3, seconds: 30, level: "normal", count: 10 };
+
+/** A random set of `count` rounds, kept in pack order (packs run easier → harder). */
+function pickRounds<T>(rounds: T[], count: number): T[] {
+  if (count <= 0 || count >= rounds.length) return rounds;
+  const indexes = rounds.map((_, i) => i);
+  for (let i = indexes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+  }
+  return indexes
+    .slice(0, count)
+    .sort((a, b) => a - b)
+    .map((i) => rounds[i]);
+}
 
 // Remembers the last setup on this device (a convenience; the game works without it).
 function loadSaved(): Saved {
@@ -62,6 +78,7 @@ export default function SetupFlow({ pack }: { pack: Pack }) {
   const [mode, setMode] = useState<Mode>("group");
   const [form, setForm] = useState<Saved>(DEFAULTS);
   const [matchKey, setMatchKey] = useState(0);
+  const [rounds, setRounds] = useState(pack.rounds);
   useEffect(() => setForm(loadSaved()), []);
 
   const update = <K extends keyof Saved>(key: K, value: Saved[K]) => setForm((f) => ({ ...f, [key]: value }));
@@ -70,7 +87,7 @@ export default function SetupFlow({ pack }: { pack: Pack }) {
   if (screen === "play") {
     const config: MatchConfig = {
       ...DEFAULT_CONFIG,
-      rounds: pack.rounds,
+      rounds,
       mode,
       pullsToWin: form.pullsToWin,
       defaultTimeLimitSec: form.seconds,
@@ -86,6 +103,8 @@ export default function SetupFlow({ pack }: { pack: Pack }) {
 
   const start = () => {
     save(form);
+    // A fresh draw each time Start is pressed, so a replayed setup gets different questions.
+    setRounds(pickRounds(pack.rounds, form.count));
     setMatchKey((k) => k + 1);
     setScreen("play");
   };
@@ -147,7 +166,7 @@ export default function SetupFlow({ pack }: { pack: Pack }) {
                 />
               </div>
               <p className="text-center text-sm font-bold text-ink-muted">
-                {pack.rounds.length} questions · about {pack.estMinutes} minutes
+                {pack.rounds.length} questions in this pack · play 5, 10 or all of them
               </p>
             </Panel>
           ) : (
@@ -181,6 +200,16 @@ export default function SetupFlow({ pack }: { pack: Pack }) {
                 )}
 
                 <Choice
+                  label="Questions"
+                  value={Math.min(form.count, pack.rounds.length) === pack.rounds.length ? 0 : form.count}
+                  onChange={(v) => update("count", v)}
+                  options={[
+                    ...[5, 10].filter((n) => n < pack.rounds.length).map((n) => ({ value: n, label: `${n}`, hint: n === 5 ? "~10 min" : "~20 min" })),
+                    { value: 0, label: `All ${pack.rounds.length}`, hint: "Full pack" },
+                  ]}
+                  note="Picked at random from the pack each match, in order from easier to harder."
+                />
+                <Choice
                   label="Match length"
                   value={form.pullsToWin}
                   onChange={(v) => update("pullsToWin", v)}
@@ -189,7 +218,7 @@ export default function SetupFlow({ pack }: { pack: Pack }) {
                     { value: 5, label: "5 steps", hint: "Standard" },
                     { value: 7, label: "7 steps", hint: "Long" },
                   ]}
-                  note={`Drag the rope this many steps your way to win early. Otherwise, whoever leads after question ${pack.rounds.length} wins.`}
+                  note="Drag the rope this many steps your way to win early. Otherwise, whoever leads after the last question wins."
                 />
                 <Choice
                   label="Time per question"

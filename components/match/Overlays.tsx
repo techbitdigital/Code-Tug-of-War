@@ -112,7 +112,7 @@ export function ReadyCard({ state, onStart }: { state: MatchState; onStart: () =
       <Versus names={config.teamNames} />
       <ul className="flex flex-col gap-1 text-[length:var(--fs-ui)] font-bold text-ink-muted">
         <li>Each team locks in one answer per question.</li>
-        <li>Right answers pull the rope. Both right? The faster team pulls.</li>
+        <li>Right answers pull the rope. Both right? Only a team that was 3+ seconds faster pulls.</li>
         <li>
           Drag the rope {n} steps your way to win, or lead after question {config.rounds.length}.
         </li>
