@@ -55,7 +55,7 @@ export default function HomePage() {
             ))}
             <article className="flex flex-col items-center justify-center gap-2 rounded-[28px] border-2 border-dashed border-line p-6 text-center">
               <p className="font-display text-xl font-black text-ink-muted">More packs coming</p>
-              <p className="text-sm font-semibold text-ink-muted">Python, HTML, SQL and how the web works.</p>
+              <p className="text-sm font-semibold text-ink-muted">HTML, SQL and how the web works.</p>
             </article>
           </div>
         </section>

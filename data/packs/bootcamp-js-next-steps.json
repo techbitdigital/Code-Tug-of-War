@@ -1,0 +1,396 @@
+{
+  "id": "bootcamp-js-next-steps",
+  "title": "JavaScript Next Steps: Conditions, Arrays, Strings",
+  "segment": [
+    "bootcamp",
+    "general"
+  ],
+  "track": "beginner",
+  "estMinutes": 6,
+  "rounds": [
+    {
+      "id": "js-if-01",
+      "concept": "if / else",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let age = 15;",
+          "if (age >= 18) console.log(\"adult\");",
+          "else console.log(\"young\");"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "adult",
+          "young",
+          "adult young",
+          "nothing"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "15 >= 18 is false, so the if line is skipped.",
+          "",
+          "if / else runs exactly one of the two lines, never both.",
+          "When the condition is false, the else line runs instead."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "age",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called age. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "15"
+          ],
+          "memory": [
+            {
+              "name": "age",
+              "value": "15",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: age is created with the value 15."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "age >= 18",
+            "15 >= 18",
+            "false"
+          ],
+          "memory": [
+            {
+              "name": "age",
+              "value": "15",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 checks age >= 18. That's false, so it skips console.log(\"adult\")."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "\"young\""
+          ],
+          "output": "young",
+          "memory": [
+            {
+              "name": "age",
+              "value": "15",
+              "scope": "global"
+            }
+          ],
+          "say": "Because the check was false, the else line runs and prints young."
+        }
+      ]
+    },
+    {
+      "id": "js-arr-01",
+      "concept": "array index",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let fruits = [\"mango\", \"apple\", \"kiwi\"];",
+          "console.log(fruits[1]);"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "mango",
+          "apple",
+          "kiwi",
+          "undefined"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "Arrays count from 0. mango is fruits[0], so fruits[1] is the second item.",
+          "",
+          "kiwi is fruits[2], the third item.",
+          "The array has 3 items, so index 1 exists and isn't undefined."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "fruits",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called fruits. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[\"mango\", \"apple\", \"kiwi\"]"
+          ],
+          "memory": [
+            {
+              "name": "fruits",
+              "value": "[\"mango\", \"apple\", \"kiwi\"]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: fruits gets a list of 3 items, at positions 0, 1 and 2."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "fruits[1]",
+            "\"apple\""
+          ],
+          "output": "apple",
+          "memory": [
+            {
+              "name": "fruits",
+              "value": "[\"mango\", \"apple\", \"kiwi\"]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2 reads position 1. Counting from 0, that's the second item, so it prints apple."
+        }
+      ]
+    },
+    {
+      "id": "js-arr-02",
+      "concept": "push and length",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let nums = [4, 8];",
+          "nums.push(15);",
+          "console.log(nums.length);"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "2",
+          "3",
+          "15",
+          "27"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "2 was the length before push. push adds an item, so there are now 3.",
+          "",
+          "15 is the item that was added, not how many items there are.",
+          "length counts the items. It doesn't add them up (4 + 8 + 15)."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "nums",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes a box called nums. It isn't ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[4, 8]"
+          ],
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[4, 8]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: nums gets a list of 2 numbers."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "nums.push(15)",
+            "[4, 8, 15]"
+          ],
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[4, 8, 15]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: push adds 15 to the end of the same list."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "nums.length",
+            "3"
+          ],
+          "output": "3",
+          "memory": [
+            {
+              "name": "nums",
+              "value": "[4, 8, 15]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: length counts the items in the list and prints 3."
+        }
+      ]
+    },
+    {
+      "id": "js-str-01",
+      "concept": "+ with a string",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "js",
+        "lines": [
+          "let a = \"5\";",
+          "let b = 2;",
+          "console.log(a + b);"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "7",
+          "52",
+          "10",
+          "NaN"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "a is \"5\" in quotes, a string. When one side of + is a string, + joins text instead of adding.",
+          "",
+          "10 would need *, and this is +. With a string, + joins.",
+          "NaN means a maths result that isn't a number. Nothing fails here: the 2 just becomes the text \"2\" and gets joined."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "a",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            },
+            {
+              "name": "b",
+              "value": "",
+              "scope": "global",
+              "changed": true,
+              "uninitialized": true
+            }
+          ],
+          "say": "Before running, the engine makes boxes for a and b. Neither is ready yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "\"5\""
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "\"5\"",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "b",
+              "value": "",
+              "scope": "global",
+              "uninitialized": true
+            }
+          ],
+          "say": "Line 1: a gets the text \"5\". The quotes make it a string, not a number."
+        },
+        {
+          "line": 1,
+          "layer": "memory",
+          "eval": [
+            "2"
+          ],
+          "memory": [
+            {
+              "name": "a",
+              "value": "\"5\"",
+              "scope": "global"
+            },
+            {
+              "name": "b",
+              "value": "2",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: b gets the number 2."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "a + b",
+            "\"5\" + 2",
+            "\"52\""
+          ],
+          "output": "52",
+          "memory": [
+            {
+              "name": "a",
+              "value": "\"5\"",
+              "scope": "global"
+            },
+            {
+              "name": "b",
+              "value": "2",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: one side is a string, so + joins them as text and prints 52."
+        }
+      ]
+    }
+  ]
+}

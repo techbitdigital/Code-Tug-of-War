@@ -1,0 +1,557 @@
+{
+  "id": "bootcamp-py-basics",
+  "title": "Python Basics: Names, Lists, Loops, Functions",
+  "segment": [
+    "bootcamp",
+    "school",
+    "general"
+  ],
+  "track": "beginner",
+  "estMinutes": 7,
+  "rounds": [
+    {
+      "id": "py-var-01",
+      "concept": "reassignment",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "x = 7",
+          "x = x + 3",
+          "print(x)"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "7",
+          "10",
+          "73",
+          "x + 3"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "7 was the first value. Line 2 replaces it.",
+          "",
+          "x is a number, so + adds. It would only join if x were text, like \"7\".",
+          "print shows the value of x, not the code that made it."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. Unlike JavaScript, no boxes exist yet: a name is made when it is first assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "7"
+          ],
+          "memory": [
+            {
+              "name": "x",
+              "value": "7",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: Python makes the name x and stores 7 in it."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "eval": [
+            "x + 3",
+            "7 + 3",
+            "10"
+          ],
+          "memory": [
+            {
+              "name": "x",
+              "value": "10",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: it works out x + 3, which is 7 + 3, and stores 10 back in x."
+        },
+        {
+          "line": 2,
+          "layer": "output",
+          "eval": [
+            "x",
+            "10"
+          ],
+          "output": "10",
+          "memory": [
+            {
+              "name": "x",
+              "value": "10",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 3: print shows 10."
+        }
+      ]
+    },
+    {
+      "id": "py-list-01",
+      "concept": "negative index",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "colors = [\"red\", \"green\", \"blue\"]",
+          "print(colors[-1])"
+        ],
+        "focusLine": 1
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "red",
+          "blue",
+          "green",
+          "IndexError"
+        ],
+        "correctIndex": 1,
+        "why": [
+          "red is colors[0]. -1 counts from the end instead.",
+          "",
+          "green is colors[1], which is also colors[-2].",
+          "Negative indexes are allowed in Python. -1 means the last item."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist until they are assigned."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "[\"red\", \"green\", \"blue\"]"
+          ],
+          "memory": [
+            {
+              "name": "colors",
+              "value": "[\"red\", \"green\", \"blue\"]",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: colors gets a list of 3 items."
+        },
+        {
+          "line": 1,
+          "layer": "output",
+          "eval": [
+            "colors[-1]",
+            "\"blue\""
+          ],
+          "output": "blue",
+          "memory": [
+            {
+              "name": "colors",
+              "value": "[\"red\", \"green\", \"blue\"]",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: -1 means the last item, so print shows blue."
+        }
+      ]
+    },
+    {
+      "id": "py-loop-01",
+      "concept": "for loop with range",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "total = 0",
+          "for n in range(1, 4):",
+          "    total = total + n",
+          "print(total)"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "6",
+          "10",
+          "4",
+          "3"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "range(1, 4) stops before 4, so n is 1, 2 and 3, never 4.",
+          "4 is where range stops. It never reaches it.",
+          "3 is the last n, but total adds every n: 1 + 2 + 3."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist yet."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "eval": [
+            "0"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "0",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: total starts at 0."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "range(1, 4)",
+            "1, 2, 3"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "0",
+              "scope": "global"
+            },
+            {
+              "name": "n",
+              "value": "1",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2: range(1, 4) gives 1, 2 and 3 (it stops before 4). First, n = 1."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + n",
+            "0 + 1",
+            "1"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "1",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "n",
+              "value": "1",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 1: total becomes 1."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next n",
+            "2"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "1",
+              "scope": "global"
+            },
+            {
+              "name": "n",
+              "value": "2",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Back to line 2: n = 2."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + n",
+            "1 + 2",
+            "3"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "3",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "n",
+              "value": "2",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 2: total becomes 3."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next n",
+            "3"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "3",
+              "scope": "global"
+            },
+            {
+              "name": "n",
+              "value": "3",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 2 again: n = 3, the last value."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "group": "loop",
+          "eval": [
+            "total + n",
+            "3 + 3",
+            "6"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "6",
+              "scope": "global",
+              "changed": true
+            },
+            {
+              "name": "n",
+              "value": "3",
+              "scope": "global"
+            }
+          ],
+          "say": "Pass 3: total becomes 6."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "group": "loop",
+          "eval": [
+            "next n",
+            "none left"
+          ],
+          "memory": [
+            {
+              "name": "total",
+              "value": "6",
+              "scope": "global"
+            },
+            {
+              "name": "n",
+              "value": "3",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 2: range has nothing left, so the loop ends. Unlike JavaScript's let i, n is still there afterwards."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "eval": [
+            "total",
+            "6"
+          ],
+          "output": "6",
+          "memory": [
+            {
+              "name": "total",
+              "value": "6",
+              "scope": "global"
+            },
+            {
+              "name": "n",
+              "value": "3",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4: print shows total: 6."
+        }
+      ]
+    },
+    {
+      "id": "py-fn-01",
+      "concept": "function return",
+      "prompt": "What does this print?",
+      "code": {
+        "lang": "py",
+        "lines": [
+          "def greet(name):",
+          "    return \"Hi \" + name",
+          "msg = greet(\"Ada\")",
+          "print(msg)"
+        ],
+        "focusLine": 2
+      },
+      "answer": {
+        "type": "mcq",
+        "options": [
+          "Hi Ada",
+          "HiAda",
+          "greet",
+          "None"
+        ],
+        "correctIndex": 0,
+        "why": [
+          "",
+          "The space is inside the quotes: \"Hi \" ends with a space.",
+          "greet(\"Ada\") calls the function, and msg gets what it returns.",
+          "A function gives back None only when it has no return. This one returns text."
+        ]
+      },
+      "reveal": [
+        {
+          "layer": "code",
+          "say": "Python reads the whole program first. No names exist yet: def only creates greet when line 1 runs."
+        },
+        {
+          "line": 0,
+          "layer": "memory",
+          "memory": [
+            {
+              "name": "greet",
+              "value": "ƒ greet(name)",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "Line 1: def creates the function greet and stores it. The body doesn't run yet."
+        },
+        {
+          "line": 2,
+          "layer": "runtime",
+          "stack": [
+            "greet(\"Ada\")",
+            "global"
+          ],
+          "eval": [
+            "greet(\"Ada\")"
+          ],
+          "memory": [
+            {
+              "name": "greet",
+              "value": "ƒ greet(name)",
+              "scope": "global"
+            },
+            {
+              "name": "name",
+              "value": "\"Ada\"",
+              "scope": "greet(\"Ada\")",
+              "changed": true
+            }
+          ],
+          "say": "Line 3 calls greet(\"Ada\"). A new frame goes on the stack, with name = \"Ada\"."
+        },
+        {
+          "line": 1,
+          "layer": "runtime",
+          "stack": [
+            "greet(\"Ada\")",
+            "global"
+          ],
+          "eval": [
+            "\"Hi \" + name",
+            "\"Hi \" + \"Ada\"",
+            "\"Hi Ada\""
+          ],
+          "memory": [
+            {
+              "name": "greet",
+              "value": "ƒ greet(name)",
+              "scope": "global"
+            },
+            {
+              "name": "name",
+              "value": "\"Ada\"",
+              "scope": "greet(\"Ada\")"
+            }
+          ],
+          "say": "Line 2 joins the two pieces of text and returns \"Hi Ada\"."
+        },
+        {
+          "line": 2,
+          "layer": "memory",
+          "stack": [
+            "global"
+          ],
+          "eval": [
+            "greet(\"Ada\")",
+            "\"Hi Ada\""
+          ],
+          "memory": [
+            {
+              "name": "greet",
+              "value": "ƒ greet(name)",
+              "scope": "global"
+            },
+            {
+              "name": "msg",
+              "value": "\"Hi Ada\"",
+              "scope": "global",
+              "changed": true
+            }
+          ],
+          "say": "The frame pops off the stack and name goes with it. Back on line 3, msg = \"Hi Ada\"."
+        },
+        {
+          "line": 3,
+          "layer": "output",
+          "stack": [
+            "global"
+          ],
+          "eval": [
+            "msg",
+            "\"Hi Ada\""
+          ],
+          "output": "Hi Ada",
+          "memory": [
+            {
+              "name": "greet",
+              "value": "ƒ greet(name)",
+              "scope": "global"
+            },
+            {
+              "name": "msg",
+              "value": "\"Hi Ada\"",
+              "scope": "global"
+            }
+          ],
+          "say": "Line 4: print shows Hi Ada, without the quotes."
+        }
+      ]
+    }
+  ]
+}

@@ -1,10 +1,12 @@
 import bootcampJsBasics from "@/data/packs/bootcamp-js-basics.json";
+import bootcampJsNextSteps from "@/data/packs/bootcamp-js-next-steps.json";
+import bootcampPyBasics from "@/data/packs/bootcamp-py-basics.json";
 import { parsePack } from "./schema";
 import type { Pack, Round } from "./types";
 
 // Every pack is validated at load time, so a bad pack fails loudly instead of
-// breaking mid-match. Register new packs in this list.
-const packs: Pack[] = [parsePack(bootcampJsBasics)];
+// breaking mid-match. Register new packs in this list (the home page shows them in this order).
+const packs: Pack[] = [parsePack(bootcampJsBasics), parsePack(bootcampJsNextSteps), parsePack(bootcampPyBasics)];
 
 export function getPacks(): Pack[] {
   return packs;
