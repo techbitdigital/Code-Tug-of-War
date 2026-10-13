@@ -320,8 +320,8 @@ export function AnswersSummary({ result, round, names }: { result: RoundResult; 
 function WhyNot({ option, text, highlight = false }: { option: string; text: string; highlight?: boolean }) {
   return (
     <div
-      className={`rounded-[calc(var(--r-key)*0.7)] border-l-4 px-[var(--gap)] py-[calc(var(--gap)*0.5)] text-left ${
-        highlight ? "border-wrong bg-[#FEE2E2]" : "border-line bg-surface"
+      className={`rounded-[calc(var(--r-key)*0.7)] px-[var(--gap)] py-[calc(var(--gap)*0.5)] text-left ${
+        highlight ? "bg-[#FEE2E2]" : "bg-surface"
       }`}
     >
       <p className="font-extrabold text-ink">

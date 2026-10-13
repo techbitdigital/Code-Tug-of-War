@@ -259,15 +259,14 @@ function ModeCard({
 }) {
   const t =
     tone === "robot"
-      ? { bar: "from-team-a-bright to-[#6366F1]", tile: "from-team-a-bright to-[#4F46E5]", ring: "hover:border-team-a", badge: "bg-team-a-soft text-team-a" }
-      : { bar: "from-team-b-bright to-[#DB2777]", tile: "from-team-b-bright to-[#DB2777]", ring: "hover:border-team-b", badge: "bg-team-b-soft text-team-b" };
+      ? { tile: "from-team-a-bright to-[#4F46E5]", ring: "hover:border-team-a", badge: "bg-team-a-soft text-team-a" }
+      : { tile: "from-team-b-bright to-[#DB2777]", ring: "hover:border-team-b", badge: "bg-team-b-soft text-team-b" };
   return (
     <button
       type="button"
       onClick={onClick}
       className={`group relative flex flex-col items-center gap-3 overflow-hidden rounded-[24px] border-2 border-line bg-surface px-6 pb-8 pt-10 text-center shadow-panel transition-[transform,border-color] hover:-translate-y-1 ${t.ring} ${FOCUS_RING}`}
     >
-      <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.bar}`} />
       <span className={`flex size-24 items-center justify-center rounded-[22px] bg-gradient-to-br text-white shadow-panel transition-transform group-hover:rotate-[-4deg] ${t.tile}`}>
         {icon}
       </span>

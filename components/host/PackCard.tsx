@@ -4,9 +4,9 @@ import type { Pack } from "@/lib/types";
 
 // Track → colour, label and difficulty dots (out of 5). Full class strings for Tailwind.
 const TRACK = {
-  beginner: { label: "Beginner", dots: 1, bar: "from-[#10B981] to-[#059669]", text: "text-[#059669]", dot: "bg-[#10B981]", button: "from-[#10B981] to-[#059669] shadow-[0_5px_0_#047857]" },
-  junior: { label: "Junior", dots: 3, bar: "from-team-a-bright to-[#6366F1]", text: "text-team-a", dot: "bg-team-a", button: "from-team-a-bright to-team-a shadow-[0_5px_0_var(--team-a-deep)]" },
-  mid: { label: "Mid-level", dots: 4, bar: "from-[#F59E0B] to-[#EA580C]", text: "text-[#EA580C]", dot: "bg-[#F59E0B]", button: "from-[#F59E0B] to-[#EA580C] shadow-[0_5px_0_#C2410C]" },
+  beginner: { label: "Beginner", dots: 1, text: "text-[#059669]", dot: "bg-[#10B981]", button: "from-[#10B981] to-[#059669] shadow-[0_5px_0_#047857]" },
+  junior: { label: "Junior", dots: 3, text: "text-team-a", dot: "bg-team-a", button: "from-team-a-bright to-team-a shadow-[0_5px_0_var(--team-a-deep)]" },
+  mid: { label: "Mid-level", dots: 4, text: "text-[#EA580C]", dot: "bg-[#F59E0B]", button: "from-[#F59E0B] to-[#EA580C] shadow-[0_5px_0_#C2410C]" },
 } as const;
 
 const LANG_ICON: Record<string, string> = { js: "JS", py: "PY", html: "</>", sql: "SQL" };
@@ -16,7 +16,6 @@ export default function PackCard({ pack }: { pack: Pack }) {
   const lang = pack.rounds.find((r) => r.code)?.code?.lang ?? "js";
   return (
     <article className="relative flex flex-col overflow-hidden rounded-[28px] bg-surface shadow-panel transition-transform duration-200 hover:-translate-y-1">
-      <div className={`h-2 bg-gradient-to-r ${t.bar}`} />
       <div className="flex flex-1 flex-col gap-4 p-6">
         <div className="flex items-start justify-between">
           <span className={`flex size-14 items-center justify-center rounded-2xl bg-arena font-mono text-lg font-black ${t.text}`}>
